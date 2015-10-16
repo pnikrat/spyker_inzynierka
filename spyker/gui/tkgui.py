@@ -118,3 +118,4 @@ class MainFrame(ttk.Frame):
         stream.record(int(self.timeentry.get()))
         stream.close_stream()
         stream.save_to_file(str(self.nameentry.get()))
+
