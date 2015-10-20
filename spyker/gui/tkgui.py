@@ -3,6 +3,7 @@ from tkinter import ttk
 from spyker.recording import *
 from spyker.plotter import *
 from spyker.decoding import *
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
 class MenuBar(Menu):
@@ -72,7 +73,9 @@ class MainFrame(ttk.Frame):
         self.playbutton = Button(self.buttonframe, text="Play")
 
         self.plotter1 = Plotter()
-        self.plotter2 = Plotter()
+        self.plotter2 = Plotter() # prawdopodobnie niepotrzebne, tylko dla testow i porownania danych z dwoch kanalow
+        # w przyszlosci prezentowane fft danych z .wav
+        self.canvas = None
 
         self.createnameframe()
         self.createtimeframe()
@@ -125,16 +128,24 @@ class MainFrame(ttk.Frame):
         self.chartframe2.grid(column=col, row=row, columnspan=colspan, rowspan=rowspan, sticky=NSEW, padx=padx,
                               pady=pady)
 
+    def bind_figure_to_char(self):
+        self.canvas = FigureCanvasTkAgg(self.plotter1.figure, master=self.parent)
+        self.chartframe = self.canvas
+        self.canvas.show()
+
     def recordSound(self, event):
         stream = SoundStream(1024, pyaudio.paInt16, 2, 44100)
         stream.open_stream()
         stream.record(int(self.timeentry.get()))
         stream.close_stream()
+        # wrzucic do osobnej funkcji
         temp = bytestring_to_intarray(stream.get_frames())
         self.plotter1.datay = temp[:, 0]
         self.plotter2.datay = temp[:, 1]
         self.plotter1.slice_time(2)
         self.plotter2.slice_time(2)
+        self.plotter1.plot()
+        self.bind_figure_to_char()
         print(self.plotter1.datax)
         stream.save_to_file(str(self.nameentry.get()))
 
