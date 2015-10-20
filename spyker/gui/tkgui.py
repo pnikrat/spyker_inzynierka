@@ -1,6 +1,8 @@
 from tkinter import *
 from tkinter import ttk
 from spyker.recording import *
+from spyker.plotter import *
+from spyker.decoding import *
 
 
 class MenuBar(Menu):
@@ -55,7 +57,8 @@ class MainFrame(ttk.Frame):
         self.nameframe = Frame(self)
         self.timeframe = Frame(self)
         self.buttonframe = Frame(self)
-        self.chartframe = Frame(self, borderwidth=1, relief="sunken", width=200, height=100)
+        self.chartframe = Frame(self, borderwidth=1, relief="sunken", width=400, height=200)
+        self.chartframe2 = Frame(self, borderwidth=1, relief="sunken", width=400, height=200)
 
         self.namelabel = Label(self.nameframe, text="Name")
         self.nameentry = Entry(self.nameframe)
@@ -68,16 +71,21 @@ class MainFrame(ttk.Frame):
         self.loadbutton = Button(self.buttonframe, text="Load")
         self.playbutton = Button(self.buttonframe, text="Play")
 
+        self.plotter1 = Plotter()
+        self.plotter2 = Plotter()
+
         self.createnameframe()
         self.createtimeframe()
         self.createbuttonframe()
-        self.createchartframe()
+        self.createchartframe(1, 0, 3, 3, 5, 5)
+        self.createchartframe2(1, 3, 3, 3, 5, 5)
 
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=3)
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
         self.rowconfigure(2, weight=1)
+        self.rowconfigure(3, weight=3)
 
     def createnameframe(self):
         self.namelabel.grid(column=0, row=0, columnspan=1, sticky=W, padx=5)
@@ -109,13 +117,24 @@ class MainFrame(ttk.Frame):
         self.buttonframe.rowconfigure(1, weight=1)
         self.buttonframe.rowconfigure(2, weight=1)
 
-    def createchartframe(self):
-        self.chartframe.grid(column=1, row=0, columnspan=3, rowspan=3, sticky=NSEW, padx=5, pady=5)
+    def createchartframe(self, col, row, colspan, rowspan, padx, pady):
+        self.chartframe.grid(column=col, row=row, columnspan=colspan, rowspan=rowspan, sticky=NSEW, padx=padx,
+                             pady=pady)
+
+    def createchartframe2(self, col, row, colspan, rowspan, padx, pady):
+        self.chartframe2.grid(column=col, row=row, columnspan=colspan, rowspan=rowspan, sticky=NSEW, padx=padx,
+                              pady=pady)
 
     def recordSound(self, event):
         stream = SoundStream(1024, pyaudio.paInt16, 2, 44100)
         stream.open_stream()
         stream.record(int(self.timeentry.get()))
         stream.close_stream()
+        temp = bytestring_to_intarray(stream.get_frames())
+        self.plotter1.datay = temp[:, 0]
+        self.plotter2.datay = temp[:, 1]
+        self.plotter1.slice_time(2)
+        self.plotter2.slice_time(2)
+        print(self.plotter1.datax)
         stream.save_to_file(str(self.nameentry.get()))
 

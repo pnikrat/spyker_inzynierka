@@ -12,6 +12,9 @@ class SoundStream:
         self.stream = None
         self.frames = []
 
+    def get_frames(self):
+        return self.frames
+
     def open_stream(self):
         self.stream = self.handle.open(format=self.format,
                                        channels=self.channels,
