@@ -23,3 +23,14 @@ class Plotter:
         assert self.datay is not None, "No data y in plotter"
         self.datax = np.linspace(0, record_time, len(self.datay))
 
+    def fft(self, samples):
+        # if len(samples) % 2 != 0:
+        #     samples = samples[:(len(samples)-1),:]
+        A = np.fft.fft(samples, len(samples))
+        freqaxis = np.fft.fftfreq(len(samples))
+        amplitude = np.abs(A)
+        phase = np.angle(A)
+        self.datax = freqaxis
+        self.datay = amplitude
+
+

@@ -133,10 +133,10 @@ class MainFrame(ttk.Frame):
         stream.open_stream()
         stream.record(int(self.timeentry.get()))
         stream.close_stream()
-        self.configure_plots(stream)
+        self.configure_plots_fft(stream)
         stream.save_to_file(str(self.nameentry.get()))
 
-    def configure_plots(self, stream):
+    def configure_plots_raw(self, stream):
         temp = bytestring_to_intarray(stream.get_frames())
         ind = 0
         for plotter in self.plotters:
@@ -145,4 +145,11 @@ class MainFrame(ttk.Frame):
             plotter.plot()
             self.bind_figure_to_char(ind)
             ind += 1
+
+    def configure_plots_fft(self, stream):
+        temp = bytestring_to_intarray(stream.get_frames())
+        self.plotters[0].fft(temp[:, 0])
+        self.plotters[0].plot()
+        self.bind_figure_to_char(0)
+
 
