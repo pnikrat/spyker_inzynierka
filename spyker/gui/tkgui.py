@@ -3,7 +3,7 @@ from tkinter import ttk
 from spyker.recording import *
 from spyker.plotter import *
 from spyker.decoding import *
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 
 
 class MenuBar(Menu):
@@ -58,8 +58,8 @@ class MainFrame(ttk.Frame):
         self.nameframe = Frame(self)
         self.timeframe = Frame(self)
         self.buttonframe = Frame(self)
-        self.chartframe = Frame(self, borderwidth=1, relief="sunken", width=400, height=200)
-        self.chartframe2 = Frame(self, borderwidth=1, relief="sunken", width=400, height=200)
+        self.chartframes = [Frame(self, borderwidth=1, relief="sunken", width=480, height=384),
+                            Frame(self, borderwidth=1, relief="sunken", width=480, height=384)]
 
         self.namelabel = Label(self.nameframe, text="Name")
         self.nameentry = Entry(self.nameframe)
@@ -68,20 +68,18 @@ class MainFrame(ttk.Frame):
         self.timeentry = Entry(self.timeframe)
 
         self.savebutton = Button(self.buttonframe, text="Record")
-        self.savebutton.bind("<Button-1>", self.recordSound)
+        self.savebutton.bind("<Button-1>", self.record_sound)
         self.loadbutton = Button(self.buttonframe, text="Load")
         self.playbutton = Button(self.buttonframe, text="Play")
 
-        self.plotter1 = Plotter()
-        self.plotter2 = Plotter() # prawdopodobnie niepotrzebne, tylko dla testow i porownania danych z dwoch kanalow
-        # w przyszlosci prezentowane fft danych z .wav
-        self.canvas = None
+        self.plotters = [Plotter(), Plotter()]
+        self.canvas = [None, None]
 
         self.createnameframe()
         self.createtimeframe()
         self.createbuttonframe()
-        self.createchartframe(1, 0, 3, 3, 5, 5)
-        self.createchartframe2(1, 3, 3, 3, 5, 5)
+        self.createchartframe(col=1, row=0, colspan=3, rowspan=3, padx=5, pady=5, which_chart=0)
+        self.createchartframe(1, 3, 3, 3, 5, 5, 1)
 
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=3)
@@ -120,32 +118,31 @@ class MainFrame(ttk.Frame):
         self.buttonframe.rowconfigure(1, weight=1)
         self.buttonframe.rowconfigure(2, weight=1)
 
-    def createchartframe(self, col, row, colspan, rowspan, padx, pady):
-        self.chartframe.grid(column=col, row=row, columnspan=colspan, rowspan=rowspan, sticky=NSEW, padx=padx,
-                             pady=pady)
+    def createchartframe(self, col, row, colspan, rowspan, padx, pady, which_chart):
 
-    def createchartframe2(self, col, row, colspan, rowspan, padx, pady):
-        self.chartframe2.grid(column=col, row=row, columnspan=colspan, rowspan=rowspan, sticky=NSEW, padx=padx,
-                              pady=pady)
+        self.chartframes[which_chart].grid(column=col, row=row, columnspan=colspan, rowspan=rowspan, sticky=NSEW,
+                                          padx=padx, pady=pady)
 
-    def bind_figure_to_char(self):
-        self.canvas = FigureCanvasTkAgg(self.plotter1.figure, master=self.parent)
-        self.chartframe = self.canvas
-        self.canvas.show()
+    def bind_figure_to_char(self, index):
+        self.canvas[index] = FigureCanvasTkAgg(self.plotters[index].figure, master = self.chartframes[index])
+        self.canvas[index].show()
+        self.canvas[index].get_tk_widget().grid(column=1, row=index*3, sticky=NSEW)
 
-    def recordSound(self, event):
+    def record_sound(self, event):
         stream = SoundStream(1024, pyaudio.paInt16, 2, 44100)
         stream.open_stream()
         stream.record(int(self.timeentry.get()))
         stream.close_stream()
-        # wrzucic do osobnej funkcji
-        temp = bytestring_to_intarray(stream.get_frames())
-        self.plotter1.datay = temp[:, 0]
-        self.plotter2.datay = temp[:, 1]
-        self.plotter1.slice_time(2)
-        self.plotter2.slice_time(2)
-        self.plotter1.plot()
-        self.bind_figure_to_char()
-        print(self.plotter1.datax)
+        self.configure_plots(stream)
         stream.save_to_file(str(self.nameentry.get()))
+
+    def configure_plots(self, stream):
+        temp = bytestring_to_intarray(stream.get_frames())
+        ind = 0
+        for plotter in self.plotters:
+            plotter.set_datay(temp[:, ind])
+            plotter.slice_time(stream.get_num_of_seconds())
+            plotter.plot()
+            self.bind_figure_to_char(ind)
+            ind += 1
 
