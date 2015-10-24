@@ -56,6 +56,7 @@ class MainFrame(ttk.Frame):
         self.grid(column=0, row=0, sticky=(N, S, E, W))
 
         self.nameframe = Frame(self)
+        self.toolbarframes = [Frame(self), Frame(self)]
         self.timeframe = Frame(self)
         self.buttonframe = Frame(self)
         self.chartframes = [Frame(self, borderwidth=1, relief="sunken", width=480, height=384),
@@ -74,19 +75,22 @@ class MainFrame(ttk.Frame):
 
         self.plotters = [Plotter(), Plotter()]
         self.canvas = [None, None]
+        self.toolbars = [None, None]
 
         self.createnameframe()
         self.createtimeframe()
         self.createbuttonframe()
         self.createchartframe(col=1, row=0, colspan=3, rowspan=3, padx=5, pady=5, which_chart=0)
-        self.createchartframe(1, 3, 3, 3, 5, 5, 1)
+        self.createchartframe(1, 4, 3, 1, 5, 5, 1)
 
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=3)
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
         self.rowconfigure(2, weight=1)
-        self.rowconfigure(3, weight=3)
+        self.rowconfigure(3, weight=1)
+        self.rowconfigure(4, weight=3)
+        self.rowconfigure(5, weight=1)
 
     def createnameframe(self):
         self.namelabel.grid(column=0, row=0, columnspan=1, sticky=W, padx=5)
@@ -127,13 +131,16 @@ class MainFrame(ttk.Frame):
         self.canvas[index] = FigureCanvasTkAgg(self.plotters[index].figure, master = self.chartframes[index])
         self.canvas[index].show()
         self.canvas[index].get_tk_widget().grid(column=1, row=index*3, sticky=NSEW)
+        self.toolbars[index] = NavigationToolbar2TkAgg(self.canvas[index], self.toolbarframes[index])
+        self.toolbars[index].update()
+        self.toolbarframes[index].grid(column=1, row=(3+2*index), sticky=S)
 
     def record_sound(self, event):
         stream = SoundStream(1024, pyaudio.paInt16, 2, 44100)
         stream.open_stream()
         stream.record(int(self.timeentry.get()))
         stream.close_stream()
-        self.configure_plots_fft(stream)
+        self.configure_plots_raw(stream)
         stream.save_to_file(str(self.nameentry.get()))
 
     def configure_plots_raw(self, stream):
