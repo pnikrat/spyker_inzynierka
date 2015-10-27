@@ -1,9 +1,19 @@
-from tkinter import *
-from tkinter import ttk
+from Tkinter import *
 from spyker.recording import *
 from spyker.plotter import *
 from spyker.decoding import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+
+
+def create_gui():
+    root = Tk()
+    root.columnconfigure(0, weight=1)
+    root.rowconfigure(0, weight=1)
+
+    MainFrame(root)
+    menubar = MenuBar(root)
+    root.config(menu=menubar)
+    root.mainloop()
 
 
 class MenuBar(Menu):
@@ -48,9 +58,9 @@ class MenuBar(Menu):
         button.pack()
 
 
-class MainFrame(ttk.Frame):
+class MainFrame(Frame):
     def __init__(self, parent, **kw):
-        ttk.Frame.__init__(self, parent, **kw)
+        Frame.__init__(self, parent, **kw)
         self.parent = parent
 
         self.grid(column=0, row=0, sticky=(N, S, E, W))
@@ -123,25 +133,25 @@ class MainFrame(ttk.Frame):
         self.buttonframe.rowconfigure(2, weight=1)
 
     def createchartframe(self, col, row, colspan, rowspan, padx, pady, which_chart):
-
         self.chartframes[which_chart].grid(column=col, row=row, columnspan=colspan, rowspan=rowspan, sticky=NSEW,
-                                          padx=padx, pady=pady)
+                                           padx=padx, pady=pady)
 
     def bind_figure_to_char(self, index):
-        self.canvas[index] = FigureCanvasTkAgg(self.plotters[index].figure, master = self.chartframes[index])
+        self.canvas[index] = FigureCanvasTkAgg(self.plotters[index].figure, master=self.chartframes[index])
         self.canvas[index].show()
-        self.canvas[index].get_tk_widget().grid(column=1, row=index*3, sticky=NSEW)
+        self.canvas[index].get_tk_widget().grid(column=1, row=index * 3, sticky=NSEW)
         self.toolbars[index] = NavigationToolbar2TkAgg(self.canvas[index], self.toolbarframes[index])
         self.toolbars[index].update()
-        self.toolbarframes[index].grid(column=1, row=(3+2*index), sticky=S)
+        self.toolbarframes[index].grid(column=1, row=(3 + 2 * index), sticky=S)
 
     def record_sound(self, event):
         stream = SoundStream(1024, pyaudio.paInt16, 2, 44100)
         stream.open_stream()
         stream.record(int(self.timeentry.get()))
         stream.close_stream()
-        self.configure_plots_raw(stream)
         stream.save_to_file(str(self.nameentry.get()))
+        self.configure_plots_fft(stream)
+        self.configure_plots_mfcc(self.nameentry.get())
 
     def configure_plots_raw(self, stream):
         temp = bytestring_to_intarray(stream.get_frames())
@@ -160,3 +170,6 @@ class MainFrame(ttk.Frame):
         self.bind_figure_to_char(0)
 
 
+    def configure_plots_mfcc(self, filename):
+        self.plotters[1].plot_mfcc(filename)
+        self.bind_figure_to_char(1)

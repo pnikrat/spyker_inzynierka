@@ -1,4 +1,7 @@
 import matplotlib as plt
+from scikits.talkbox.features import mfcc
+import scipy.io.wavfile
+
 plt.use('TkAgg')
 import numpy as np
 from matplotlib.figure import Figure
@@ -11,8 +14,8 @@ class Plotter:
         self.figure = None
 
     def plot(self):
-        fig = Figure(figsize=(5,4), dpi=100) #figsize - (width,height) in inches
-        ax = fig.add_subplot(111) #nrows, ncols, plot_number
+        fig = Figure(figsize=(3, 3), dpi=100)  # figsize - (width,height) in inches
+        ax = fig.add_subplot(111)  # nrows, ncols, plot_number
         ax.plot(self.datax, self.datay)
         self.figure = fig
 
@@ -33,4 +36,14 @@ class Plotter:
         self.datax = freqaxis
         self.datay = amplitude
 
+    def plot_mfcc(self, filename):
+        sample_rate, X = scipy.io.wavfile.read(filename)
+        ceps, mspec, spec = mfcc(X)
 
+        m, n = ceps.shape
+        x, y = np.mgrid[0:m, 0:n]
+
+        fig = Figure(figsize=(3, 3), dpi=100)
+        ax = fig.add_subplot(111)
+        ax.imshow(ceps, origin='lower', aspect='auto', extent=(x.min(), x.max(), y.min(), y.max()))
+        self.figure = fig
