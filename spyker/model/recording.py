@@ -1,3 +1,4 @@
+import os
 import pyaudio
 import wave
 
@@ -38,10 +39,12 @@ class SoundStream:
         self.stream.close()
         self.handle.terminate()
 
-    def save_to_file(self, filename):
-        wf = wave.open(str(filename), 'wb')
+    def save_to_file(self, file_name):
+        if not os.path.exists("records"):
+            os.makedirs("records")
+        wf = wave.open("records/" + str(file_name), 'wb')
         wf.setnchannels(self.channels)
         wf.setsampwidth(self.handle.get_sample_size(self.format))
         wf.setframerate(self.rate)
-        wf.writeframes(b''.join(self.frames)) # bytestring join
+        wf.writeframes(b''.join(self.frames))  # bytestring join
         wf.close()

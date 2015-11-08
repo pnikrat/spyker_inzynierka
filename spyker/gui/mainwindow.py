@@ -1,17 +1,14 @@
 from PyQt4 import QtGui, QtCore
-from spyker.gui.recordwindow import NewRecordWindow
-from spyker.models.filelistmodel import FileListModel
+from spyker.gui.recordwindow import RecordWindow
+from spyker.model.filelistmodel import FileListModel
 
 
 class FileGrid(QtGui.QGridLayout):
     def __init__(self):
         super(FileGrid, self).__init__()
 
-        red = QtGui.QColor(255, 0, 0)
-        green = QtGui.QColor(0, 255, 0)
-        blue = QtGui.QColor(0, 0, 255)
 
-        self.model = FileListModel([red, green, blue])
+        self.model = FileListModel(['C:\Users', 'C:\Users\Pictures', 'C:\Users\Saved'])
 
         self.table_view = QtGui.QListView()
         self.table_view.setModel(self.model)
@@ -23,7 +20,7 @@ class FileGrid(QtGui.QGridLayout):
         remove_button.clicked.connect(self.start_add_new_window)
 
         edit_button = QtGui.QPushButton('e')
-        remove_button.clicked.connect(self.start_add_new_window)
+        edit_button.clicked.connect(self.start_add_new_window)
 
         self.addWidget(self.table_view, 0, 0, 6, 1)
         self.addWidget(add_button, 0, 1)
@@ -31,18 +28,15 @@ class FileGrid(QtGui.QGridLayout):
         self.addWidget(edit_button, 2, 1)
 
     def start_add_new_window(self):
-        self.new_record_window = NewRecordWindow(self.model)
+        self.new_record_window = RecordWindow(self.model)
         self.new_record_window.show()
 
 class ChartGrid(QtGui.QGridLayout):
     def __init__(self):
         super(ChartGrid, self).__init__()
 
-        red = QtGui.QColor(255, 0, 0)
-        green = QtGui.QColor(0, 255, 0)
-        blue = QtGui.QColor(0, 0, 255)
 
-        self.model = FileListModel([red, green, blue])
+        self.model = FileListModel(['C:\Users', 'C:\Users\Pictures', 'C:\Users\Saved'])
 
         self.table_view = QtGui.QListView()
         self.table_view.setModel(self.model)
@@ -54,7 +48,7 @@ class ChartGrid(QtGui.QGridLayout):
         remove_button.clicked.connect(self.start_add_new_window)
 
         edit_button = QtGui.QPushButton('e')
-        remove_button.clicked.connect(self.start_add_new_window)
+        edit_button.clicked.connect(self.start_add_new_window)
 
         self.addWidget(self.table_view, 0, 0, 6, 1)
         self.addWidget(add_button, 0, 1)
@@ -62,7 +56,7 @@ class ChartGrid(QtGui.QGridLayout):
         self.addWidget(edit_button, 2, 1)
 
     def start_add_new_window(self):
-        self.new_record_window = NewRecordWindow(self.model)
+        self.new_record_window = (self.model)
         self.new_record_window.show()
 
 
