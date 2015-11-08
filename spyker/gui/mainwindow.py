@@ -7,8 +7,7 @@ class FileGrid(QtGui.QGridLayout):
     def __init__(self):
         super(FileGrid, self).__init__()
 
-
-        self.model = FileListModel(['C:\Users', 'C:\Users\Pictures', 'C:\Users\Saved'])
+        self.model = FileListModel()
 
         self.table_view = QtGui.QListView()
         self.table_view.setModel(self.model)
@@ -31,12 +30,12 @@ class FileGrid(QtGui.QGridLayout):
         self.new_record_window = RecordWindow(self.model)
         self.new_record_window.show()
 
+
 class ChartGrid(QtGui.QGridLayout):
     def __init__(self):
         super(ChartGrid, self).__init__()
 
-
-        self.model = FileListModel(['C:\Users', 'C:\Users\Pictures', 'C:\Users\Saved'])
+        self.model = FileListModel()
 
         self.table_view = QtGui.QListView()
         self.table_view.setModel(self.model)
