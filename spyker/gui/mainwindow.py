@@ -1,6 +1,23 @@
+import os
 from PyQt4 import QtGui, QtCore
 from spyker.gui.recordwindow import RecordWindow
 from spyker.model.filelistmodel import FileListModel
+from os import listdir
+from os.path import isfile, join
+
+RECS_DIR = "records"
+
+
+class FileListView(QtGui.QListView):
+    def __init__(self, model):
+        super(FileListView, self).__init__()
+
+        self.setModel(model)
+
+        if os.path.exists(RECS_DIR):
+            for f in listdir(RECS_DIR):
+                if isfile(join(RECS_DIR, f)):
+                    self.model().insertRows(f)
 
 
 class FileGrid(QtGui.QGridLayout):
@@ -9,8 +26,7 @@ class FileGrid(QtGui.QGridLayout):
 
         self.model = FileListModel()
 
-        self.table_view = QtGui.QListView()
-        self.table_view.setModel(self.model)
+        self.list_view = FileListView(self.model)
 
         add_button = QtGui.QPushButton('+')
         add_button.clicked.connect(self.start_add_new_window)
@@ -21,7 +37,7 @@ class FileGrid(QtGui.QGridLayout):
         edit_button = QtGui.QPushButton('e')
         edit_button.clicked.connect(self.start_add_new_window)
 
-        self.addWidget(self.table_view, 0, 0, 6, 1)
+        self.addWidget(self.list_view, 0, 0, 6, 1)
         self.addWidget(add_button, 0, 1)
         self.addWidget(remove_button, 1, 1)
         self.addWidget(edit_button, 2, 1)
