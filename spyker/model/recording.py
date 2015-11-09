@@ -1,6 +1,7 @@
 import os
 import pyaudio
 import wave
+from spyker.utils.constants import RECS_DIR
 
 
 class SoundStream:
@@ -40,9 +41,9 @@ class SoundStream:
         self.handle.terminate()
 
     def save_to_file(self, file_name):
-        if not os.path.exists("records"):
-            os.makedirs("records")
-        wf = wave.open("records/" + str(file_name), 'wb')
+        if not os.path.exists(RECS_DIR):
+            os.makedirs(RECS_DIR)
+        wf = wave.open(RECS_DIR + "/" + str(file_name), 'wb')
         wf.setnchannels(self.channels)
         wf.setsampwidth(self.handle.get_sample_size(self.format))
         wf.setframerate(self.rate)
