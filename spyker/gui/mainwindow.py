@@ -68,7 +68,9 @@ class FileGrid(QtGui.QGridLayout):
         new_sure_window = SureWindow(self.model, 'Are you sure you want to delete this recording?')
         if new_sure_window.exec_():
             if new_sure_window.result:
+                file_name = self.list_view.currentIndex().data().toString()
                 self.model.removeRows(self.list_view.currentIndex().row(), 1)
+                os.remove(RECS_DIR + "/" + file_name)
 
 
 class ChartGrid(QtGui.QGridLayout):
