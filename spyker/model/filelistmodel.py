@@ -6,8 +6,6 @@ class FileListModel(QtCore.QAbstractListModel):
         QtCore.QAbstractListModel.__init__(self, parent)
         self.__file_paths = file_paths
 
-
-
     def rowCount(self, parent):
         return len(self.__file_paths)
 

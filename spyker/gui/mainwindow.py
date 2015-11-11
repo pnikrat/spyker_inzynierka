@@ -1,6 +1,7 @@
 import os
 from PyQt4 import QtGui, QtCore
 from spyker.gui.recordwindow import RecordWindow
+from spyker.gui.surewindow import *
 from spyker.model.filelistmodel import FileListModel
 from os import listdir
 from os.path import isfile, join
@@ -53,15 +54,21 @@ class FileGrid(QtGui.QGridLayout):
         add_button.clicked.connect(self.start_add_new_window)
 
         remove_button = FileButton("-", "#d05d4f")
-        remove_button.clicked.connect(self.start_add_new_window)
+        remove_button.clicked.connect(self.start_sure_window)
 
         self.addWidget(self.list_view, 0, 0, 6, 1)
         self.addWidget(add_button, 0, 1)
         self.addWidget(remove_button, 1, 1)
 
     def start_add_new_window(self):
-        self.new_record_window = RecordWindow(self.model)
-        self.new_record_window.show()
+        new_record_window = RecordWindow(self.model)
+        new_record_window.show()
+
+    def start_sure_window(self):
+        new_sure_window = SureWindow(self.model, 'Are you sure you want to delete this recording?')
+        if new_sure_window.exec_():
+            if new_sure_window.result:
+                self.model.removeRows(self.list_view.currentIndex().row(), 1)
 
 
 class ChartGrid(QtGui.QGridLayout):
