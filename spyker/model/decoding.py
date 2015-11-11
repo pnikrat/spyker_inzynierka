@@ -1,5 +1,9 @@
 import numpy as np
 
+#------------------------ARCHIVE-------------------------------------------
+# Byc moze zastapione przez scipy.io.wavfile.read(RECS_DIR + "/" + filename)
+# Zobacze jeszcze ;)
+#----------------------------------------------------------------------------
 
 def decode(raw_data, d_type, samples_per_channel, num_of_channels):
     '''

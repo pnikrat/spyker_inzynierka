@@ -6,6 +6,9 @@ plt.use('TkAgg')
 import numpy as np
 from matplotlib.figure import Figure
 
+#-----------------------------------------------------ARCHIVE------------------------------------------------
+#---  Klasa bazujaca na Tkinter. Wciaz w projekcie bo zawiera troche kodu dotyczacego plotowania cech mowcy
+#------------------------------------------------------------------------------------------------------------
 
 class Plotter:
     def __init__(self):
@@ -26,7 +29,7 @@ class Plotter:
         assert self.datay is not None, "No data y in plotter"
         self.datax = np.linspace(0, record_time, len(self.datay))
 
-    def fft(self, samples):
+    def fft(self, samples): #do przeniesienia!
         # if len(samples) % 2 != 0:
         #     samples = samples[:(len(samples)-1),:]
         A = np.fft.fft(samples, len(samples))
@@ -36,7 +39,7 @@ class Plotter:
         self.datax = freqaxis
         self.datay = amplitude
 
-    def plot_mfcc(self, filename):
+    def plot_mfcc(self, filename): #przeniesiono do QT
         sample_rate, X = scipy.io.wavfile.read(filename)
         ceps, mspec, spec = mfcc(X)
 
