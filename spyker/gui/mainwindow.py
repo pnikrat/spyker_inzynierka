@@ -131,7 +131,7 @@ class MainWindow(QtGui.QWidget):
         super(MainWindow, self).__init__()
 
         self.file_list_model = FileListModel()
-        self.chart_list_model = ChartListModel(["Raw .wav data", "MFCC", "FFT", "SFFT"])
+        self.chart_list_model = ChartListModel(["Raw .wav data", "MFCC", "FFT", "STFT"])
 
         hbox = QtGui.QHBoxLayout(self)
 
