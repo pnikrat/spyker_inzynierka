@@ -61,7 +61,7 @@ class RecordWindow(QtGui.QWidget):
         if self.is_data_valid():
             self.record_duration = int(self.length_edit.text())
             self.record_name = self.name_edit.text()
-            self.stream = SoundStream(1024, pyaudio.paInt16, 2, 44100)
+            self.stream = SoundStream(1024, pyaudio.paInt16, 1, 44100)
             self.stream.open_stream()
             self.set_buttons_enabled(False)
             self.stream.record(self.record_duration)

@@ -37,3 +37,24 @@ class MFCC(MyCanvas):
         x, y = np.mgrid[0:m, 0:n]
 
         self.axes.imshow(ceps, origin='lower', aspect='auto', extent=(x.min(), x.max(), y.min(), y.max()))
+        self.axes.set_xlabel('Frame number')
+        self.axes.set_ylabel('Coefficient number')
+
+
+class Raw(MyCanvas):
+    def __init__(self, *args, **kwargs):
+        super(Raw, self).__init__(*args, **kwargs)
+
+    def compute_figure(self, filename):
+        sample_rate, data = scipy.io.wavfile.read(RECS_DIR + "/" + filename)
+        time = np.linspace(0, float(len(data))/sample_rate, len(data))
+        data = self.rescale(data)
+        self.axes.plot(time, data)
+        self.axes.set_xlabel('Time [s]')
+        self.axes.set_ylabel('Amplitude [-]')
+
+    def rescale(self, data):
+        #rescale in place
+        data = data.astype(float) / 32768.0
+        return data
+
