@@ -1,13 +1,19 @@
 import os
-from PyQt4 import QtGui, QtCore
-from spyker.gui.recordwindow import RecordWindow
-from spyker.gui.surewindow import SureWindow
-from spyker.gui.chart import CanvasWindow
-from spyker.model.filelistmodel import FileListModel
-from spyker.model.chartlistmodel import ChartListModel
 from os import listdir
 from os.path import isfile, join
-from spyker.utils.constants import RECS_DIR
+
+from PyQt4 import QtGui, QtCore
+from matplotlib.colors import LogNorm
+import scipy
+import pylab
+import scipy.io.wavfile
+
+from spyker import plots
+from spyker.gui.recordwindow import RecordWindow
+from spyker.gui.surewindow import SureWindow
+from spyker.model.filelistmodel import FileListModel
+from spyker.model.chartlistmodel import ChartListModel
+from spyker.utils.constants import *
 
 
 class FileListView(QtGui.QListView):
@@ -99,7 +105,7 @@ class PlotGrid(QtGui.QGridLayout):
         self.Fmodel = Fmodel
         self.Cmodel = Cmodel
 
-        self.plot_windows=[]
+        self.plot_windows = []
 
         self.file_label = QtGui.QLabel('Current file is: ')
         self.file_combo_box = QtGui.QComboBox()
@@ -110,7 +116,7 @@ class PlotGrid(QtGui.QGridLayout):
         self.chart_combo_box.setModel(self.Cmodel)
 
         self.plot_button = QtGui.QPushButton('Plot')
-        self.plot_button.clicked.connect(self.button_clicked)
+        self.plot_button.clicked.connect(self.plot_button_clicked)
 
         self.addWidget(self.file_label, 0, 0)
         self.addWidget(self.file_combo_box, 0, 1)
@@ -120,10 +126,22 @@ class PlotGrid(QtGui.QGridLayout):
 
         self.addWidget(self.plot_button, 2, 1)
 
-    def button_clicked(self):
-        self.new_plot = CanvasWindow(self.file_combo_box.currentText(), self.chart_combo_box.currentIndex())
-        self.plot_windows.append(self.new_plot)
-        self.new_plot.show()
+    def plot_button_clicked(self, chart_type):
+        fs, x = scipy.io.wavfile.read("records" + "/" + self.file_combo_box.currentText())
+        pylab.figure()
+
+        if self.chart_combo_box.currentText() == ChartType.MFCC:
+            ceps = plots.mfccoef(x)
+            pylab.imshow(ceps, origin='lower', aspect='auto')
+
+        elif self.chart_combo_box.currentText() == ChartType.STFT:
+            X = plots.stft(x.T[0], fs)
+            pylab.imshow(scipy.absolute(X.T), origin='lower', aspect='auto', interpolation='nearest', norm=LogNorm())
+
+        pylab.colorbar()
+        pylab.xlabel('Time')
+        pylab.ylabel('Frequency')
+        pylab.show()
 
 
 class MainWindow(QtGui.QWidget):
@@ -131,7 +149,7 @@ class MainWindow(QtGui.QWidget):
         super(MainWindow, self).__init__()
 
         self.file_list_model = FileListModel()
-        self.chart_list_model = ChartListModel(["Raw .wav data", "MFCC", "FFT", "SFFT"])
+        self.chart_list_model = ChartListModel([ChartType.RAW, ChartType.MFCC, ChartType.STFT])
 
         hbox = QtGui.QHBoxLayout(self)
 

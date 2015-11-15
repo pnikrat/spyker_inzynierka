@@ -1,10 +1,12 @@
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from spyker.utils.constants import *
 from scikits.talkbox.features import mfcc
-import scipy.io.wavfile
 import numpy as np
+import scipy
+import scipy.io.wavfile
+
+from spyker.utils.constants import *
 
 
 class MyCanvas(FigureCanvas):
@@ -21,7 +23,7 @@ class MyCanvas(FigureCanvas):
         FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
 
-    def compute_figure(self, filename): #abstract method
+    def compute_figure(self, filename):  # abstract method
         pass
 
 
@@ -35,5 +37,20 @@ class MFCC(MyCanvas):
 
         m, n = ceps.shape
         x, y = np.mgrid[0:m, 0:n]
+        return ceps
 
-        self.axes.imshow(ceps, origin='lower', aspect='auto', extent=(x.min(), x.max(), y.min(), y.max()))
+
+def mfccoef(x):
+    ceps, mspec, spec = mfcc(x)
+    return ceps
+
+
+def stft(x, fs):
+    frame_size = 0.050  # with a frame size of 50 milliseconds
+    hop = 0.025  # and hop size of 25 milliseconds.
+    frame_samp = int(frame_size * fs)
+    hop_samp = int(hop * fs)
+    w = scipy.hanning(frame_samp)
+    X = scipy.array([scipy.fft(w * x[i:i + frame_samp])
+                     for i in range(0, len(x) - frame_samp, hop_samp)])
+    return X
