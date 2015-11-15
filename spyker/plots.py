@@ -83,3 +83,19 @@ class STFT(MyCanvas):
         print freqs.shape, t.shape, spectrum.shape
         surf = self.axes.plot_surface(freqs, t, spectrum, rstride=3, cstride=3, cmap=cm.coolwarm, linewidth=0)
         self.fig.colorbar(surf)
+
+
+class FFT(MyCanvas):
+    def __init__(self, *args, **kwargs):
+        super(FFT, self).__init__(*args, **kwargs)
+
+    def compute_figure(self, filename):
+        sample_rate, data = scipy.io.wavfile.read(RECS_DIR + '/' + filename)
+        time = np.linspace(0, float(len(data))/sample_rate, len(data))
+        freq = np.fft.fftfreq(time.shape[-1], 1.0/sample_rate)
+        complex_array = np.fft.fft(data)
+        modul = np.abs(complex_array.real)
+        self.axes.plot(freq[:(len(freq)/2)], modul[:(len(modul)/2)], 'g')
+        self.axes.set_xlabel('Frequency [Hz]')
+        self.axes.set_ylabel('Amplitude [-]')
+

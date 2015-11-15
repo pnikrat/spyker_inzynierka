@@ -131,7 +131,7 @@ class MainWindow(QtGui.QWidget):
         super(MainWindow, self).__init__()
 
         self.file_list_model = FileListModel()
-        self.chart_list_model = ChartListModel(["Raw .wav data", "MFCC", "FFT", "STFT"])
+        self.chart_list_model = ChartListModel(["Raw .wav data", "MFCC", "FFT Magnitude", "STFT"])
 
         hbox = QtGui.QHBoxLayout(self)
 
@@ -162,4 +162,4 @@ class MainWindow(QtGui.QWidget):
         self.setLayout(hbox)
 
         self.setGeometry(200, 200, 700, 400)
-        self.setWindowTitle('Speaker features')
+        self.setWindowTitle('Main window')
