@@ -5,7 +5,7 @@ import scipy.io.wavfile
 import numpy as np
 from PyQt4 import QtGui
 from scikits.talkbox.features import mfcc
-
+import scipy.signal
 from spyker.utils.constants import *
 
 
@@ -38,9 +38,9 @@ class MFCC(MyCanvas):
         m, n = ceps.shape
         x, y = np.mgrid[0:m, 0:n]
 
-        self.axes.imshow(ceps, origin='lower', aspect='auto', extent=(x.min(), x.max(), y.min(), y.max()))
-        self.axes.set_xlabel('Frame number')
-        self.axes.set_ylabel('Coefficient number')
+        self.axes.imshow(ceps, origin='lower', aspect='auto')
+        self.axes.set_xlabel('Coefficient number')
+        self.axes.set_ylabel('Frame number')
 
 
 class Raw(MyCanvas):
@@ -114,6 +114,21 @@ class STFT(MyCanvas):
                          for i in range(0, len(x) - frame_samp, hop_samp)])
 
         self.axes.imshow(scipy.absolute(X.T), origin='lower', aspect='auto', interpolation='nearest', norm=LogNorm())
-        self.axes.set_xlabel('Amplitude [-]')
-        self.axes.set_ylabel('Frequency [Hz]')
+        self.axes.set_xlabel('Frame number')
+
+
+class Envelope(MyCanvas):
+    def __init__(self, *args, **kwargs):
+        super(Envelope, self).__init__(*args, **kwargs)
+
+    def compute_figure(self, filename):
+        sample_rate, data = scipy.io.wavfile.read(RECS_DIR + "/" + filename)
+        time = np.linspace(0, float(len(data)) / sample_rate, len(data))
+        envelope = abs(scipy.signal.hilbert(data))
+        self.axes.plot(time, data)
+        self.axes.hold('on')
+        self.axes.plot(time, envelope, 'r')
+
+        self.axes.set_xlabel('Time [s]')
+
 

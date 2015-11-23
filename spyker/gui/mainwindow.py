@@ -99,7 +99,7 @@ class PlotGrid(QtGui.QGridLayout):
         self.Fmodel = Fmodel
         self.Cmodel = Cmodel
 
-        self.plot_windows=[]
+        self.plot_windows = []
 
         self.file_label = QtGui.QLabel('Current file is: ')
         self.file_combo_box = QtGui.QComboBox()
@@ -131,7 +131,8 @@ class MainWindow(QtGui.QWidget):
         super(MainWindow, self).__init__()
 
         self.file_list_model = FileListModel()
-        self.chart_list_model = ChartListModel([ChartType.RAW, ChartType.MFCC, ChartType.FFT, ChartType.STFT])
+        self.chart_list_model = ChartListModel(
+            [ChartType.RAW, ChartType.MFCC, ChartType.FFT, ChartType.STFT, ChartType.ENVELOPE])
 
         hbox = QtGui.QHBoxLayout(self)
 
