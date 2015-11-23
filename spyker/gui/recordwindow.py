@@ -23,7 +23,7 @@ class RecordWindow(QtGui.QWidget):
         self.record_button = QtGui.QPushButton('Record')
         self.record_button.clicked.connect(lambda: self.record())
         self.play_button = QtGui.QPushButton('Play')
-        self.play_button.clicked.connect(self.close)
+        self.play_button.clicked.connect(lambda: self.play())
 
         self.ok_button = QtGui.QPushButton('Ok')
         self.ok_button.clicked.connect(lambda: self.save_new_record())
@@ -67,6 +67,9 @@ class RecordWindow(QtGui.QWidget):
             self.stream.record(self.record_duration)
             self.stream.close_stream()
             self.set_buttons_enabled(True)
+
+    def play(self):
+        pass
 
     def set_buttons_enabled(self, enabled):
         self.ok_button.setEnabled(enabled)
