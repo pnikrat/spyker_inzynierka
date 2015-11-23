@@ -93,37 +93,49 @@ class ChartGrid(QtGui.QGridLayout):
 
 
 class PlotGrid(QtGui.QGridLayout):
-    def __init__(self, Fmodel, Cmodel):
+    def __init__(self, Fmodel, Cmodel, Fview, Cview):
         super(PlotGrid, self).__init__()
 
         self.Fmodel = Fmodel
         self.Cmodel = Cmodel
+        self.Fview = Fview
+        self.Cview = Cview
+        self.currentPlot = None
+        self.currentRecording = None
 
         self.plot_windows = []
 
-        self.file_label = QtGui.QLabel('Current file is: ')
-        self.file_combo_box = QtGui.QComboBox()
-        self.file_combo_box.setModel(self.Fmodel)
+        self.file_label = QtGui.QLabel('Current file is: None')
 
-        self.chart_label = QtGui.QLabel('Current chart is: ')
-        self.chart_combo_box = QtGui.QComboBox()
-        self.chart_combo_box.setModel(self.Cmodel)
+        self.chart_label = QtGui.QLabel('Current chart is: None')
 
         self.plot_button = QtGui.QPushButton('Plot')
         self.plot_button.clicked.connect(self.button_clicked)
 
-        self.addWidget(self.file_label, 0, 0)
-        self.addWidget(self.file_combo_box, 0, 1)
+        self.addWidget(self.file_label, 0, 0, 1, 2)
 
-        self.addWidget(self.chart_label, 1, 0)
-        self.addWidget(self.chart_combo_box, 1, 1)
+        self.addWidget(self.chart_label, 1, 0, 1, 2)
 
-        self.addWidget(self.plot_button, 2, 1)
+        self.addWidget(self.plot_button, 2, 0, 1, 2)
 
     def button_clicked(self):
-        self.new_plot = CanvasWindow(self.file_combo_box.currentText(), self.chart_combo_box.currentIndex())
-        self.plot_windows.append(self.new_plot)
-        self.new_plot.show()
+        try:
+            self.new_plot = CanvasWindow(self.currentRecording, self.currentPlot)
+            self.plot_windows.append(self.new_plot)
+            self.new_plot.show()
+        except TypeError:
+            self.chart_label.setText('Choose plot type and recording name first!')
+        except IOError:
+            self.chart_label.setText('This recording no longer exists!')
+
+    def labels_change(self):
+        name = self.Fmodel.data(self.Fview.currentIndex(), QtCore.Qt.DisplayRole)
+        self.currentRecording = name
+        self.file_label.setText('Current file is: %s' % name)
+
+        self.currentPlot = self.Cview.currentIndex().row()
+        name = self.Cmodel.data(self.Cview.currentIndex(), QtCore.Qt.DisplayRole)
+        self.chart_label.setText('Current chart is: %s' % name)
 
 
 class MainWindow(QtGui.QWidget):
@@ -131,8 +143,8 @@ class MainWindow(QtGui.QWidget):
         super(MainWindow, self).__init__()
 
         self.file_list_model = FileListModel()
-        self.chart_list_model = ChartListModel(
-            [ChartType.RAW, ChartType.MFCC, ChartType.FFT, ChartType.STFT, ChartType.ENVELOPE])
+        self.chart_list_model = ChartListModel([ChartType.RAW, ChartType.MFCC, ChartType.FFT, ChartType.STFT
+                                                , ChartType.STFT3D, ChartType.ENVELOPE])
 
         hbox = QtGui.QHBoxLayout(self)
 
@@ -144,13 +156,16 @@ class MainWindow(QtGui.QWidget):
         chart_frame = QtGui.QFrame()
         chart_frame.setLayout(chart_grid)
 
+
         splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
         splitter1.addWidget(file_frame)
         splitter1.addWidget(chart_frame)
 
-        plot_grid = PlotGrid(self.file_list_model, self.chart_list_model)
+        plot_grid = PlotGrid(self.file_list_model, self.chart_list_model, file_grid.list_view, chart_grid.list_view)
         plot_frame = QtGui.QFrame()
         plot_frame.setLayout(plot_grid)
+        chart_grid.list_view.clicked.connect(plot_grid.labels_change)
+        file_grid.list_view.clicked.connect(plot_grid.labels_change)
 
         splitter2 = QtGui.QSplitter(QtCore.Qt.Horizontal)
         splitter2.addWidget(splitter1)
@@ -162,5 +177,5 @@ class MainWindow(QtGui.QWidget):
         hbox.addWidget(splitter2)
         self.setLayout(hbox)
 
-        self.setGeometry(200, 200, 700, 400)
+        self.setGeometry(200, 200, 700, 200)
         self.setWindowTitle('Main window')

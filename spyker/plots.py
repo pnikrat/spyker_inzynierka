@@ -5,6 +5,9 @@ import scipy.io.wavfile
 import numpy as np
 from PyQt4 import QtGui
 from scikits.talkbox.features import mfcc
+from matplotlib.mlab import specgram
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
 import scipy.signal
 from spyker.utils.constants import *
 
@@ -61,27 +64,27 @@ class Raw(MyCanvas):
         return data
 
 
-# class STFT(MyCanvas):
-#     def __init__(self, parent=None, width=5, height=4, dpi=100, filename=None):
-#         self.fig = Figure(figsize=(width, height), dpi=dpi)
-#         self.axes = self.fig.gca(projection='3d')
-#
-#         self.compute_figure(filename)
-#
-#         FigureCanvas.__init__(self, self.fig)
-#         self.setParent(parent)
-#
-#         FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-#         FigureCanvas.updateGeometry(self)
-#
-#     def compute_figure(self, filename):
-#         sample_rate, data = scipy.io.wavfile.read(RECS_DIR + "/" + filename)
-#         (spectrum, freqs, t) = specgram(data, NFFT=256, Fs=sample_rate)
-#         print freqs.shape, t.shape
-#         t, freqs = np.meshgrid(t, freqs)
-#         print freqs.shape, t.shape, spectrum.shape
-#         surf = self.axes.plot_surface(freqs, t, spectrum, rstride=3, cstride=3, cmap=cm.coolwarm, linewidth=0)
-#         self.fig.colorbar(surf)
+class STFT3D(MyCanvas):
+    def __init__(self, parent=None, width=5, height=4, dpi=100, filename=None):
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = self.fig.gca(projection='3d')
+
+        self.compute_figure(filename)
+
+        FigureCanvas.__init__(self, self.fig)
+        self.setParent(parent)
+
+        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)
+
+    def compute_figure(self, filename):
+        sample_rate, data = scipy.io.wavfile.read(RECS_DIR + "/" + filename)
+        (spectrum, freqs, t) = specgram(data, NFFT=256, Fs=sample_rate)
+        print freqs.shape, t.shape
+        t, freqs = np.meshgrid(t, freqs)
+        print freqs.shape, t.shape, spectrum.shape
+        surf = self.axes.plot_surface(freqs, t, spectrum, rstride=3, cstride=3, cmap=cm.coolwarm,  linewidth=0)
+        self.fig.colorbar(surf)
 
 
 class FFT(MyCanvas):
@@ -91,9 +94,10 @@ class FFT(MyCanvas):
     def compute_figure(self, filename):
         sample_rate, data = scipy.io.wavfile.read(RECS_DIR + '/' + filename)
         time = np.linspace(0, float(len(data)) / sample_rate, len(data))
+        #data_windowed = scipy.hanning(data)
+        complex_array = np.fft.fft(data, len(data))
         freq = np.fft.fftfreq(time.shape[-1], 1.0 / sample_rate)
-        complex_array = np.fft.fft(data)
-        module = np.abs(complex_array.real)
+        module = ((complex_array.real**2 + complex_array.imag**2)**0.5) / len(data)
         self.axes.plot(freq[:(len(freq) / 2)], module[:(len(module) / 2)], 'g')
         self.axes.set_xlabel('Frequency [Hz]')
         self.axes.set_ylabel('Amplitude [-]')
@@ -114,7 +118,8 @@ class STFT(MyCanvas):
                          for i in range(0, len(x) - frame_samp, hop_samp)])
 
         self.axes.imshow(scipy.absolute(X.T), origin='lower', aspect='auto', interpolation='nearest', norm=LogNorm())
-        self.axes.set_xlabel('Frame number')
+        self.axes.set_xlabel('Frame number [-]')
+        self.axes.set_ylabel('Frequency [Hz]')
 
 
 class Envelope(MyCanvas):
