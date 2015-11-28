@@ -1,7 +1,9 @@
 from PyQt4 import QtGui
 import pyaudio
+import winsound
 
 from spyker.model.recording import SoundStream
+from spyker.utils.constants import RECS_DIR
 import spyker.utils.utils as utils
 
 
@@ -69,7 +71,10 @@ class RecordWindow(QtGui.QWidget):
             self.set_buttons_enabled(True)
 
     def play(self):
-        pass
+        if self.record_name is not None:
+            winsound.PlaySound(RECS_DIR + '/' + str(self.record_name), winsound.SND_FILENAME)
+        else:
+            self.error_label.setText("<font color=\"red\">* Record the file first</font>")
 
     def set_buttons_enabled(self, enabled):
         self.ok_button.setEnabled(enabled)

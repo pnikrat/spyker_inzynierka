@@ -6,9 +6,9 @@ import numpy as np
 from PyQt4 import QtGui
 from scikits.talkbox.features import mfcc
 from matplotlib.mlab import specgram
-from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import scipy.signal
+
 from spyker.utils.constants import *
 
 

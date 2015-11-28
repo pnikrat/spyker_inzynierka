@@ -1,9 +1,9 @@
 from PyQt4 import QtGui
 
 
-class SureWindow(QtGui.QDialog):
+class DialogWindow(QtGui.QDialog):
     def __init__(self, model, message):
-        super(SureWindow,self).__init__()
+        super(DialogWindow,self).__init__()
 
         self.model = model
 

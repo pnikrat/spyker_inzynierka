@@ -1,4 +1,5 @@
 from PyQt4 import QtGui
+
 from spyker.plots import MFCC, Raw, FFT, STFT, STFT3D, Envelope
 from spyker.utils.constants import ChartType
 

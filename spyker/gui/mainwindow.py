@@ -1,13 +1,14 @@
 import os
-from PyQt4 import QtGui, QtCore
-from spyker.gui.recordwindow import RecordWindow
-from spyker.gui.surewindow import SureWindow
-from spyker.gui.chart import CanvasWindow
-from spyker.model.filelistmodel import FileListModel
-from spyker.model.chartlistmodel import ChartListModel
 from os import listdir
 from os.path import isfile, join
-from spyker.utils.constants import RECS_DIR, ChartType
+
+from PyQt4 import QtGui, QtCore
+
+from spyker.gui.chartwindow import ChartWindow
+from spyker.gui.filebutton import FileButton
+from spyker.gui.recordwindow import RecordWindow
+from spyker.gui.dialogwindow import DialogWindow
+from spyker.utils.constants import RECS_DIR
 
 
 class FileListView(QtGui.QListView):
@@ -25,30 +26,9 @@ class FileListView(QtGui.QListView):
 class ChartListView(QtGui.QListView):
     def __init__(self, model):
         super(ChartListView, self).__init__()
-
         self.setModel(model)
 
 
-class FileButton(QtGui.QPushButton):
-    def __init__(self, text, color):
-        super(FileButton, self).__init__()
-        self.setFixedSize(25, 25)
-        self.setStyleSheet("""
-            FileButton {
-                color:""" + color + """;
-                font: 18px;
-                border-radius: 2px;
-                }
-
-            FileButton:hover {
-                background-color: #c4c4c4;
-                }
-
-            FileButton:pressed {
-                background-color: #a2a2a2;
-                }
-            """)
-        self.setText(text)
 
 
 class FileGrid(QtGui.QGridLayout):
@@ -63,7 +43,7 @@ class FileGrid(QtGui.QGridLayout):
         add_button.clicked.connect(self.start_add_new_window)
 
         remove_button = FileButton("-", "#d05d4f")
-        remove_button.clicked.connect(self.start_sure_window)
+        remove_button.clicked.connect(self.confirm_deletion)
 
         self.addWidget(self.list_view, 0, 0, 6, 1)
         self.addWidget(add_button, 0, 1)
@@ -73,13 +53,13 @@ class FileGrid(QtGui.QGridLayout):
         self.new_record_window = RecordWindow(self.model)
         self.new_record_window.show()
 
-    def start_sure_window(self):
-        self.new_sure_window = SureWindow(self.model, 'Are you sure you want to delete this recording?')
-        if self.new_sure_window.exec_():
-            if self.new_sure_window.result:
+    def confirm_deletion(self):
+        dialog_window = DialogWindow(self.model, 'Are you sure you want to delete this recording?')
+        if dialog_window.exec_():
+            if dialog_window.result:
                 file_name = self.list_view.currentIndex().data().toString()
                 self.model.removeRows(self.list_view.currentIndex().row(), 1)
-                os.remove(RECS_DIR + "/" + file_name)
+                os.remove(RECS_DIR + "/" + str(file_name))
 
 
 class ChartGrid(QtGui.QGridLayout):
@@ -100,9 +80,10 @@ class PlotGrid(QtGui.QGridLayout):
         self.Cmodel = Cmodel
         self.Fview = Fview
         self.Cview = Cview
-        self.currentPlot = None
-        self.currentRecording = None
-
+        self.current_chart_key = None
+        self.current_chart_value = None
+        self.current_recording = None
+        self.setColumnMinimumWidth(1, 200)
         self.plot_windows = []
 
         self.file_label = QtGui.QLabel('Current file is: None')
@@ -119,32 +100,23 @@ class PlotGrid(QtGui.QGridLayout):
         self.addWidget(self.plot_button, 2, 0, 1, 2)
 
     def button_clicked(self):
-        try:
-            self.new_plot = CanvasWindow(self.currentRecording, self.currentPlot)
-            self.plot_windows.append(self.new_plot)
-            self.new_plot.show()
-        except TypeError:
-            self.chart_label.setText('Choose plot type and recording name first!')
-        except IOError:
-            self.chart_label.setText('This recording no longer exists!')
+        chart_window = ChartWindow(self.current_chart_value, self.current_recording)
+        chart_window.show()
 
     def labels_change(self):
-        name = self.Fmodel.data(self.Fview.currentIndex(), QtCore.Qt.DisplayRole)
-        self.currentRecording = name
-        self.file_label.setText('Current file is: %s' % name)
+        self.current_recording = self.Fmodel.data(self.Fview.currentIndex(), QtCore.Qt.DisplayRole)
+        self.file_label.setText('Current file is: %s' % self.current_recording)
 
-        self.currentPlot = self.Cview.currentIndex().row()
-        name = self.Cmodel.data(self.Cview.currentIndex(), QtCore.Qt.DisplayRole)
-        self.chart_label.setText('Current chart is: %s' % name)
+        self.current_chart_key, self.current_chart_value = self.Cmodel.data(self.Cview.currentIndex(), QtCore.Qt.DisplayRole)
+        self.chart_label.setText('Current chart is: %s' % self.current_chart_key)
 
 
 class MainWindow(QtGui.QWidget):
-    def __init__(self):
+    def __init__(self, file_list_model, chart_list_model):
         super(MainWindow, self).__init__()
 
-        self.file_list_model = FileListModel()
-        self.chart_list_model = ChartListModel([ChartType.RAW, ChartType.MFCC, ChartType.FFT, ChartType.STFT
-                                                , ChartType.STFT3D, ChartType.ENVELOPE])
+        self.file_list_model = file_list_model
+        self.chart_list_model = chart_list_model
 
         hbox = QtGui.QHBoxLayout(self)
 
@@ -155,7 +127,6 @@ class MainWindow(QtGui.QWidget):
         chart_grid = ChartGrid(self.chart_list_model)
         chart_frame = QtGui.QFrame()
         chart_frame.setLayout(chart_grid)
-
 
         splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
         splitter1.addWidget(file_frame)

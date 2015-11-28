@@ -1,3 +1,5 @@
+from collections import OrderedDict
+import inspect
 import os
 
 
@@ -16,3 +18,9 @@ def is_number(number):
         return True
     except ValueError:
         return False
+
+def get_kwargs(function):
+    argspec = inspect.getargspec(function)
+    kwarg_values = argspec.defaults
+    kwarg_keys = argspec.args[-len(kwarg_values):]
+    return OrderedDict(zip(kwarg_keys, kwarg_values))
