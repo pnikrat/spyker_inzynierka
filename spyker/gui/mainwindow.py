@@ -2,7 +2,7 @@ import os
 from PyQt4 import QtGui, QtCore
 from spyker.gui.recordwindow import RecordWindow
 from spyker.gui.surewindow import SureWindow
-from spyker.gui.chart import CanvasWindow
+from spyker.gui.chart import PlotView
 from spyker.model.filelistmodel import FileListModel
 from spyker.model.chartlistmodel import ChartListModel
 from os import listdir
@@ -120,7 +120,7 @@ class PlotGrid(QtGui.QGridLayout):
 
     def button_clicked(self):
         try:
-            self.new_plot = CanvasWindow(self.currentRecording, self.currentPlot)
+            self.new_plot = PlotView(self.currentRecording, self.currentPlot)
             self.plot_windows.append(self.new_plot)
             self.new_plot.show()
         except TypeError:
