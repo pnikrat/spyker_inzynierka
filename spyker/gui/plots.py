@@ -10,6 +10,7 @@ from matplotlib import cm
 import scipy.signal
 
 from spyker.utils.constants import *
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 
 
 class MyCanvas(FigureCanvas):
@@ -18,6 +19,7 @@ class MyCanvas(FigureCanvas):
         self.axes = fig.add_subplot(111)
         self.axes.hold(False)
 
+
         self.compute_figure(filename)
 
         FigureCanvas.__init__(self, fig)
@@ -25,6 +27,8 @@ class MyCanvas(FigureCanvas):
 
         FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
+        self.navi_toolbar = NavigationToolbar(self, parent)
+
 
     def compute_figure(self, filename):  # abstract method
         pass
@@ -76,6 +80,8 @@ class STFT3D(MyCanvas):
 
         FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
+        self.navi_toolbar = NavigationToolbar(self, parent)
+        self.axes.mouse_init()
 
     def compute_figure(self, filename):
         sample_rate, data = scipy.io.wavfile.read(RECS_DIR + "/" + filename)

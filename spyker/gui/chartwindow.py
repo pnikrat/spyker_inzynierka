@@ -8,6 +8,7 @@ import scipy.signal
 import scipy.io.wavfile
 
 from spyker.utils.constants import RECS_DIR
+from spyker.utils.pltutils import plot_function
 from spyker.utils.utils import get_kwargs
 
 
@@ -44,13 +45,8 @@ class ChartWindow(QtGui.QDialog):
         self.resize(700, 500)
 
     def replot(self):
-        self.fig.clear()
-
-        data = self.function(*self.get_args())
-        ax = self.fig.add_subplot(1, 1, 1)
-        pax = ax.pcolormesh(data)
-        self.fig.colorbar(pax)
-        ax.autoscale(enable=True, axis='both', tight=True)
+        data, time, labels = self.function(*self.get_args())
+        plot_function(self.fig, data, time, **labels)
         self.canvas.draw()
 
     def add_kwarg_fields(self):
@@ -68,8 +64,8 @@ class ChartWindow(QtGui.QDialog):
                 self.data_layout.addLayout(h_box_layout)
 
     def get_args(self):
-        fs, x = scipy.io.wavfile.read(RECS_DIR + '/' + self.filename)
-        args = [fs, x]
+        fs, data = scipy.io.wavfile.read(RECS_DIR + '/' + self.filename)
+        args = [fs, data]
         for kwarg_edit in self.kwarg_edits:
             args.append(float(kwarg_edit.text()))
         return args
