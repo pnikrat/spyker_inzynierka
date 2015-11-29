@@ -1,34 +1,14 @@
 import os
-from os import listdir
-from os.path import isfile, join
 
 from PyQt4 import QtGui, QtCore
+from spyker.gui.chartlistview import ChartListView
 
 from spyker.gui.chartwindow import ChartWindow
 from spyker.gui.filebutton import FileButton
+from spyker.gui.filelistview import FileListView
 from spyker.gui.recordwindow import RecordWindow
 from spyker.gui.dialogwindow import DialogWindow
 from spyker.utils.constants import RECS_DIR
-
-
-class FileListView(QtGui.QListView):
-    def __init__(self, model):
-        super(FileListView, self).__init__()
-
-        self.setModel(model)
-
-        if os.path.exists(RECS_DIR):
-            for f in listdir(RECS_DIR):
-                if isfile(join(RECS_DIR, f)):
-                    self.model().insertRows(f)
-
-
-class ChartListView(QtGui.QListView):
-    def __init__(self, model):
-        super(ChartListView, self).__init__()
-        self.setModel(model)
-
-
 
 
 class FileGrid(QtGui.QGridLayout):
@@ -107,7 +87,8 @@ class PlotGrid(QtGui.QGridLayout):
         self.current_recording = self.Fmodel.data(self.Fview.currentIndex(), QtCore.Qt.DisplayRole)
         self.file_label.setText('Current file is: %s' % self.current_recording)
 
-        self.current_chart_key, self.current_chart_value = self.Cmodel.data(self.Cview.currentIndex(), QtCore.Qt.DisplayRole)
+        self.current_chart_key, self.current_chart_value = self.Cmodel.data(self.Cview.currentIndex(),
+                                                                            QtCore.Qt.UserRole)
         self.chart_label.setText('Current chart is: %s' % self.current_chart_key)
 
 

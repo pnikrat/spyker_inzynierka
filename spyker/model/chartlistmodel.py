@@ -12,4 +12,6 @@ class ChartListModel(QtCore.QAbstractListModel):
 
     def data(self, index, role):
         if role == QtCore.Qt.DisplayRole:
+            return self.chart_dict.keys()[index.row()]
+        elif role == QtCore.Qt.UserRole:
             return self.chart_dict.items()[index.row()]
