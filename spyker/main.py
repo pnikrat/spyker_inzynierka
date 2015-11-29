@@ -9,10 +9,10 @@ from spyker.utils.constants import ChartType
 
 if __name__ == '__main__':
     chart_dict = OrderedDict({ChartType.RAW: plots.raw,
-                              ChartType.MFCC: plots.mfcceps,
+                              ChartType.ENVELOPE: plots.envelope,
                               ChartType.FFT: plots.fft,
-                              ChartType.STFT: plots.stft,
-                              ChartType.ENVELOPE: plots.envelope})
+                              ChartType.MFCC: plots.mfccoefs,
+                              ChartType.STFT: plots.stft})
 
     chart_list_model = ChartListModel(chart_dict)
     file_list_model = FileListModel()

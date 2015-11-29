@@ -5,11 +5,6 @@ from scikits.talkbox.features import mfcc
 import scipy.signal
 
 
-def envelope(fs, data):
-    time = np.linspace(0, float(len(data)) / fs, len(data))
-    return time, abs(scipy.signal.hilbert(data))
-
-
 def stft(fs, data, frame_size=0.01, hop=0.05):
     frame_samp = int(frame_size * fs)
     hop_samp = int(hop * fs)
@@ -20,14 +15,14 @@ def stft(fs, data, frame_size=0.01, hop=0.05):
     return scipy.log10(scipy.absolute(data.T)), None, labels
 
 
-def mfcceps(fs, data):
-    ceps, mspec, spec = mfcc(data)
+def mfccoefs(fs, data, nwin=256, nfft=512, nceps=13):
+    ceps, mspec, spec = mfcc(data, nwin, nfft, fs, nceps)
     labels = {'xlabel': 'Coefficient number', 'ylabel': 'Frame number', 'zlabel': 'dwaddddddd'}
     return ceps, None, labels
 
 
 def raw(fs, data):
-    data = data.astype(float) / 32768.0
+    # data = data.astype(float) / 32768.0
     time = np.linspace(0, float(len(data)) / fs, len(data))
     labels = {'xlabel': 'Time [s]', 'ylabel': 'Amplitude [-]'}
     return data, time, labels
