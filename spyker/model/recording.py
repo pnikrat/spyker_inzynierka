@@ -21,12 +21,18 @@ class SoundStream:
     def get_num_of_seconds(self):
         return self.num_of_seconds
 
-    def open_stream(self):
-        self.stream = self.handle.open(format=self.format,
-                                       channels=self.channels,
-                                       rate=self.rate,
-                                       input=True,
-                                       frames_per_buffer=self.chunk)
+    def open_stream(self, mode):
+        if mode == "in":
+            self.stream = self.handle.open(format=self.format,
+                                            channels=self.channels,
+                                            rate=self.rate,
+                                            input=True,
+                                            frames_per_buffer=self.chunk)
+        elif mode == "out":
+            self.stream = self.handle.open(format=self.format,
+                                            channels=self.channels,
+                                            rate=self.rate,
+                                            output=True)
 
     def record(self, num_of_seconds):
         self.num_of_seconds = num_of_seconds
@@ -34,6 +40,14 @@ class SoundStream:
         for i in range(0, int(self.rate / self.chunk * num_of_seconds)):
             data = self.stream.read(self.chunk)
             self.frames.append(data)
+
+    def play_recording(self, file_name):
+        file = wave.open(RECS_DIR + "/" + str(file_name), "rb")
+        data = file.readframes(self.chunk)
+        while data != "":
+            self.stream.write(data)
+            data = file.readframes(self.chunk)
+        self.close_stream()
 
     def close_stream(self):
         self.stream.stop_stream()
