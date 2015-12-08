@@ -1,6 +1,5 @@
 from PyQt4 import QtGui
 import pyaudio
-import winsound
 
 from spyker.model.recording import SoundStream
 from spyker.utils.constants import RECS_DIR
@@ -28,7 +27,7 @@ class RecordWindow(QtGui.QWidget):
         self.play_button.clicked.connect(lambda: self.play())
 
         self.ok_button = QtGui.QPushButton('Ok')
-        self.ok_button.clicked.connect(lambda: self.save_new_record())
+        self.ok_button.clicked.connect(lambda: self.close())
         self.cancel_button = QtGui.QPushButton('Cancel')
         self.cancel_button.clicked.connect(self.close)
 
@@ -57,22 +56,25 @@ class RecordWindow(QtGui.QWidget):
         if self.record_name is not None:
             self.stream.save_to_file(self.record_name)
             self.model.insertRows(self.record_name)
-        self.close()
 
     def record(self):
         if self.is_data_valid():
             self.record_duration = int(self.length_edit.text())
             self.record_name = self.name_edit.text()
             self.stream = SoundStream(1024, pyaudio.paInt16, 1, 44100)
-            self.stream.open_stream()
+            self.stream.open_stream("in")
             self.set_buttons_enabled(False)
             self.stream.record(self.record_duration)
+            self.save_new_record()
             self.stream.close_stream()
             self.set_buttons_enabled(True)
 
+
     def play(self):
         if self.record_name is not None:
-            winsound.PlaySound(RECS_DIR + '/' + str(self.record_name), winsound.SND_FILENAME)
+            self.stream = SoundStream(1024, pyaudio.paInt16, 1, 44100)
+            self.stream.open_stream("out")
+            self.stream.play_recording(self.record_name)
         else:
             self.error_label.setText("<font color=\"red\">* Record the file first</font>")
 
