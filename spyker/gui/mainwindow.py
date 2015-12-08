@@ -100,13 +100,10 @@ class PlotGrid(QtGui.QGridLayout):
 
     def labels_change(self):
         self.current_recording = self.Fmodel.data(self.Fview.currentIndex(), QtCore.Qt.DisplayRole)
-        print "Recording: " + self.current_recording
         self.file_label.setText('Current file is: %s' % self.current_recording)
 
         self.current_chart_key, self.current_chart_value = self.Cmodel.data(self.Cview.currentIndex(),
                                                                             QtCore.Qt.UserRole)
-        print "key: " + self.current_chart_key
-        print "value: " + str(self.current_chart_value)
         self.chart_label.setText('Current chart is: %s' % self.current_chart_key)
 
 

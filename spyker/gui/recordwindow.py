@@ -167,13 +167,13 @@ class RecordWindow(QtGui.QDialog):
                 self.replot_after()
 
     def replot_before(self):
-        data, time, labels = plots.raw(f_sampling, self.data)
-        plot_function(self.figB, data, time, **labels)
+        data = plots.raw(f_sampling, self.data)
+        plot_function(self.figB, data)
         self.canvasB.draw()
 
     def replot_after(self):
-        data, time, labels = plots.raw(f_sampling, self.data)
-        plot_function(self.figA, data, time, **labels)
+        data = plots.raw(f_sampling, self.data)
+        plot_function(self.figA, data)
         self.canvasA.draw()
 
     def clean_temp_data(self):

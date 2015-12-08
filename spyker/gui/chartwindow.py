@@ -1,6 +1,7 @@
 import inspect
 
 from PyQt4 import QtGui
+from PyQt4.uic.properties import QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 import matplotlib.pyplot as plt
@@ -40,13 +41,13 @@ class ChartWindow(QtGui.QDialog):
         self.layout.addLayout(self.plot_layout)
         self.layout.addLayout(self.data_layout)
 
-        self.setLayout(self.layout)
         self.replot()
+        self.setLayout(self.layout)
         self.resize(700, 500)
 
     def replot(self):
-        data, time, labels = self.function(*self.get_args())
-        plot_function(self.fig, data, time, **labels)
+        data = self.function(*self.get_args())
+        plot_function(self.fig, data)
         self.canvas.draw()
 
     def add_kwarg_fields(self):
