@@ -1,4 +1,5 @@
 RECS_DIR = "records"
+f_sampling = 44100
 
 
 class ChartType:

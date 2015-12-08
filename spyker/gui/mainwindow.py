@@ -27,7 +27,7 @@ class FileGrid(QtGui.QGridLayout):
         remove_button = FileButton("-", "#d05d4f")
         remove_button.clicked.connect(self.confirm_deletion)
 
-        play_button = FileButton("P", "#35ae56")
+        play_button = FileButton("", "#35ae56", "icons/play.png")
         play_button.clicked.connect(lambda: self.play_recording())
 
         self.addWidget(self.list_view, 0, 0, 6, 1)
@@ -37,7 +37,7 @@ class FileGrid(QtGui.QGridLayout):
 
     def start_add_new_window(self):
         self.new_record_window = RecordWindow(self.model)
-        self.new_record_window.show()
+        self.new_record_window.exec_()
 
     def confirm_deletion(self):
         dialog_window = DialogWindow(self.model, 'Are you sure you want to delete this recording?')
@@ -76,7 +76,7 @@ class PlotGrid(QtGui.QGridLayout):
         self.current_chart_value = None
         self.current_recording = None
         self.setColumnMinimumWidth(1, 200)
-        self.plot_windows = []
+        #self.plot_windows = []
 
         self.file_label = QtGui.QLabel('Current file is: None')
 
@@ -92,15 +92,21 @@ class PlotGrid(QtGui.QGridLayout):
         self.addWidget(self.plot_button, 2, 0, 1, 2)
 
     def button_clicked(self):
-        chart_window = ChartWindow(self.current_chart_value, self.current_recording)
-        chart_window.show()
+        try:
+            chart_window = ChartWindow(self.current_chart_value, self.current_recording)
+            chart_window.show()
+        except TypeError:
+            self.chart_label.setText("Choose chart type and file first!")
 
     def labels_change(self):
         self.current_recording = self.Fmodel.data(self.Fview.currentIndex(), QtCore.Qt.DisplayRole)
+        print "Recording: " + self.current_recording
         self.file_label.setText('Current file is: %s' % self.current_recording)
 
         self.current_chart_key, self.current_chart_value = self.Cmodel.data(self.Cview.currentIndex(),
                                                                             QtCore.Qt.UserRole)
+        print "key: " + self.current_chart_key
+        print "value: " + str(self.current_chart_value)
         self.chart_label.setText('Current chart is: %s' % self.current_chart_key)
 
 

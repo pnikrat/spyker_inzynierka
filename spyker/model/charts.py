@@ -22,7 +22,7 @@ def mfccoefs(fs, data, nwin=256, nfft=512, nceps=13):
 
 
 def raw(fs, data):
-    # data = data.astype(float) / 32768.0
+    data = data.astype(float) / 32768.0
     time = np.linspace(0, float(len(data)) / fs, len(data))
     labels = {'xlabel': 'Time [s]', 'ylabel': 'Amplitude [-]'}
     return data, time, labels
