@@ -60,7 +60,7 @@ class RecordWindow(QtGui.QDialog):
         self.trim_button.clicked.connect(lambda: self.trim_recording())
 
         self.apply_button = QtGui.QPushButton('Apply and save recording')
-        self.apply_button.clicked.connect(lambda : self.apply())
+        self.apply_button.clicked.connect(lambda : self.save_new_record())
 
         self.trim_options_group = QtGui.QButtonGroup(self)
         self.trim_none = QtGui.QRadioButton("None")
@@ -190,10 +190,10 @@ class RecordWindow(QtGui.QDialog):
 
     def save_new_record(self):
         if self.record_name is not None:
-            self.stream.save_to_file(self.record_name)
+            #self.stream.save_to_file(self.record_name)
+            scipy.io.wavfile.write(self.record_name, f_sampling, self.data)
             self.model.insertRows(self.record_name)
-            chart_window = ChartWindow(plots.raw, self.record_name)
-            chart_window.show()
+            self.accept()
 
     def is_data_valid(self):
         if utils.is_valid_path(str(self.record_name_edit.text())):
