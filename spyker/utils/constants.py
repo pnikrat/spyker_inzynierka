@@ -8,3 +8,4 @@ class ChartType:
     FFT = 'FFT'
     STFT3D = 'STFT3D'
     ENVELOPE = 'ENVELOPE'
+    FORMANT_FREQS = 'FORMANT FREQUENCIES'
