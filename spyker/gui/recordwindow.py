@@ -191,7 +191,7 @@ class RecordWindow(QtGui.QDialog):
     def save_new_record(self):
         if self.record_name is not None:
             #self.stream.save_to_file(self.record_name)
-            scipy.io.wavfile.write(self.record_name, f_sampling, self.data)
+            scipy.io.wavfile.write(RECS_DIR + "/" + self.record_name, f_sampling, self.data)
             self.model.insertRows(self.record_name)
             self.accept()
 
