@@ -2,10 +2,17 @@ import os
 import pyaudio
 import wave
 import numpy as np
+import matplotlib.pyplot as plt
+import spyker.model.charts as plots
+from spyker.utils.pltutils import plot_function
+from spyker.utils.constants import f_sampling
+from PyQt4 import QtGui
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 from spyker.utils.constants import RECS_DIR
 
 
-class SoundStream:
+class SoundStream(object):
     def __init__(self, chunk, format, channels, rate):
         self.chunk = chunk
         self.format = format
@@ -55,15 +62,52 @@ class SoundStream:
         self.stream.close()
         self.handle.terminate()
 
-    def save_to_file(self, file_name):
-        if not os.path.exists(RECS_DIR):
-            os.makedirs(RECS_DIR)
-        wf = wave.open(RECS_DIR + "/" + str(file_name), 'wb')
-        wf.setnchannels(self.channels)
-        wf.setsampwidth(self.handle.get_sample_size(self.format))
-        wf.setframerate(self.rate)
-        wf.writeframes(b''.join(self.frames))  # bytestring join
-        wf.close()
+    # def save_to_file(self, file_name):
+    #     if not os.path.exists(RECS_DIR):
+    #         os.makedirs(RECS_DIR)
+    #     wf = wave.open(RECS_DIR + "/" + str(file_name), 'wb')
+    #     wf.setnchannels(self.channels)
+    #     wf.setsampwidth(self.handle.get_sample_size(self.format))
+    #     wf.setframerate(self.rate)
+    #     wf.writeframes(b''.join(self.frames))  # bytestring join
+    #     wf.close()
+
+
+class TrimCanvas(QtGui.QWidget):
+    def __init__(self):
+        super(TrimCanvas, self).__init__()
+        self.figure = plt.figure()
+        self.canvas = FigureCanvas(self.figure)
+        self.toolbar = NavigationToolbar2QT(self.canvas, self)
+        self.frames = None
+        self.data = None
+
+    def hidecanvas(self, state):
+        if not state:
+            self.canvas.show()
+            self.toolbar.show()
+        else:
+            self.canvas.hide()
+            self.toolbar.hide()
+
+    def replot(self, mode, record_duration):
+        if mode == 'm':
+            data = plots.raw(f_sampling, self.data, (record_duration*0.4, record_duration*0.8))
+        else:
+            data = plots.raw(f_sampling, self.data)
+        plot_function(self.figure, data)
+        self.canvas.draw()
+
+    def clear_data(self):
+        self.figure.clear()
+        self.canvas.draw()
+        self.frames = None
+        self.data = None
+
+    def data2frames(self):
+        bytes = self.data.tobytes()
+        self.frames = [bytes[i:i+2048] for i in range(0, len(bytes), 2048)]
+
 
 def autotrimalgo(data_to_trim):
     datacopy = np.copy(data_to_trim)

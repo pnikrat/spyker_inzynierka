@@ -18,9 +18,12 @@ def plot_function(fig, data):
 
     if len(labels) == 2:
         ax.plot(x_vector, y_vector)
+        if data['sliders'] is not None:
+            slider1XPos, slider2XPos = data['sliders']
+            ax.axvline(x=slider1XPos, color='r')
+            ax.axvline(x=slider2XPos, color='r')
     elif len(labels) == 3:
         pax = ax.pcolormesh(y_vector)
         cbar = fig.colorbar(pax)
         cbar.ax.set_ylabel(labels.get('zlabel'))
         ax.autoscale(enable=True, axis='both', tight=True)
-

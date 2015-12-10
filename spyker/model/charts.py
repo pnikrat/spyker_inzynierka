@@ -26,7 +26,7 @@ def mfccoefs(fs, data, nwin=256, nfft=512, nceps=13):
     return {'y_vector': ceps, 'x_vector': None, 'labels': labels}
 
 
-def raw(fs, data):
+def raw(fs, data, slidersPos=None):
     data = data.astype(float) / 32768.0
     # We then split the file into chunks, where the number of chunks depends on how finely you want to measure the volume:
 
@@ -38,7 +38,7 @@ def raw(fs, data):
     # dbs = [20 * log10(sqrt(mean(chunk ** 2))) for chunk in chunks]
 
     labels = {'xlabel': 'Time [s]', 'ylabel': 'Amplitude [-]'}
-    return {'y_vector': data, 'x_vector': time, 'labels': labels}
+    return {'y_vector': data, 'x_vector': time, 'labels': labels, 'sliders': slidersPos}
 
 
 def fft(fs, data):

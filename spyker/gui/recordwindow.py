@@ -1,17 +1,7 @@
-from PyQt4 import QtGui
-import pyaudio
-import tempfile
-
-from spyker.model.recording import SoundStream, autotrimalgo
+from spyker.model.recording import *
 from spyker.utils.constants import RECS_DIR
-from spyker.gui.chartwindow import ChartWindow
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
-import spyker.model.charts as plots
 import spyker.utils.utils as utils
-from spyker.utils.pltutils import plot_function
 from spyker.utils.constants import f_sampling
-import matplotlib.pyplot as plt
 import scipy.io.wavfile
 import numpy as np
 
@@ -25,21 +15,12 @@ class RecordWindow(QtGui.QDialog):
         self.stream = None
         self.model = model
         self.trim = 'n'
-        self.file_handle = tempfile.NamedTemporaryFile()
-        self.frames = None
-        self.data = None
 
         self.initUI()
 
     def initUI(self):
-        self.figB = plt.figure()
-        self.figA = plt.figure()
-        self.canvasB = FigureCanvas(self.figB)
-        self.toolbarB = NavigationToolbar2QT(self.canvasB, self)
-        self.before_label = QtGui.QLabel('Signal before trim')
-        self.canvasA = FigureCanvas(self.figA)
-        self.toolbarA = NavigationToolbar2QT(self.canvasA, self)
-        self.after_label = QtGui.QLabel('Signal after trim')
+        self.before = TrimCanvas()
+        self.after = TrimCanvas()
 
         self.record_name_label = QtGui.QLabel('Name')
         self.record_name_edit = QtGui.QLineEdit()
@@ -51,13 +32,16 @@ class RecordWindow(QtGui.QDialog):
         self.record_button.clicked.connect(lambda: self.record())
 
         self.play_button_before = QtGui.QPushButton('Play signal before trimming')
-        self.play_button_before.clicked.connect(lambda: self.play())
+        self.play_button_before.clicked.connect(lambda: self.play('b'))
 
         self.play_button_after = QtGui.QPushButton('Play signal after trimming')
-        self.play_button_after.clicked.connect(lambda: self.play())
+        self.play_button_after.clicked.connect(lambda: self.play('a'))
 
         self.trim_button = QtGui.QPushButton('Trim')
         self.trim_button.clicked.connect(lambda: self.trim_recording())
+
+        self.cancel_button = QtGui.QPushButton('Cancel all data')
+        self.cancel_button.clicked.connect(lambda : self.cancel_recording())
 
         self.apply_button = QtGui.QPushButton('Apply and save recording')
         self.apply_button.clicked.connect(lambda : self.save_new_record())
@@ -74,6 +58,7 @@ class RecordWindow(QtGui.QDialog):
         self.trim_auto.clicked.connect(lambda: self.trim_mode_change('a'))
         self.trim_manual.clicked.connect(lambda: self.trim_mode_change('m'))
 
+        self.trim_radio_buttons = [self.trim_none, self.trim_auto, self.trim_manual]
 
         self.ui_message = QtGui.QLabel()
 
@@ -91,6 +76,7 @@ class RecordWindow(QtGui.QDialog):
         self.actions_layout = QtGui.QVBoxLayout()
         self.actions_layout.addWidget(self.record_button)
         self.actions_layout.addWidget(self.trim_button)
+        self.actions_layout.addWidget(self.cancel_button)
 
         self.ui_layout = QtGui.QHBoxLayout()
         self.ui_layout.addLayout(self.details_layout)
@@ -98,19 +84,19 @@ class RecordWindow(QtGui.QDialog):
         self.ui_layout.addLayout(self.actions_layout)
 
         self.before_trim_under_layout = QtGui.QHBoxLayout()
-        self.before_trim_under_layout.addWidget(self.toolbarB)
+        self.before_trim_under_layout.addWidget(self.before.toolbar)
         self.before_trim_under_layout.addWidget(self.play_button_before)
 
         self.before_trim_layout = QtGui.QVBoxLayout()
-        self.before_trim_layout.addWidget(self.canvasB)
+        self.before_trim_layout.addWidget(self.before.canvas)
         self.before_trim_layout.addLayout(self.before_trim_under_layout)
 
         self.after_trim_under_layout = QtGui.QHBoxLayout()
-        self.after_trim_under_layout.addWidget(self.toolbarA)
+        self.after_trim_under_layout.addWidget(self.after.toolbar)
         self.after_trim_under_layout.addWidget(self.play_button_after)
 
         self.after_trim_layout = QtGui.QVBoxLayout()
-        self.after_trim_layout.addWidget(self.canvasA)
+        self.after_trim_layout.addWidget(self.after.canvas)
         self.after_trim_layout.addLayout(self.after_trim_under_layout)
 
         self.widget_layout = QtGui.QVBoxLayout()
@@ -128,13 +114,11 @@ class RecordWindow(QtGui.QDialog):
 
     def hide_canvas(self):
         if self.trim == 'n':
-            self.canvasA.hide()
+            self.after.hidecanvas(True)
             self.play_button_after.hide()
-            self.toolbarA.hide()
         else:
-            self.canvasA.show()
+            self.after.hidecanvas(False)
             self.play_button_after.show()
-            self.toolbarA.show()
 
     def trim_mode_change(self, mode):
         self.trim = mode
@@ -143,9 +127,14 @@ class RecordWindow(QtGui.QDialog):
     def message_user(self, message):
         self.ui_message.setText("<font color=\"red\">* " + message + "</font>")
 
+    def disabling_elements(self, elements, state):
+        for x in elements:
+            x.setDisabled(state)
+
     def record(self):
         if self.is_data_valid():
-            #self.clean_temp_data()
+            self.disabling_elements(self.trim_radio_buttons, True)
+
             self.message_user("Recording!") #NOT WORKING!
             self.record_duration = int(self.record_duration_edit.text())
             self.record_name = self.record_name_edit.text()
@@ -153,47 +142,50 @@ class RecordWindow(QtGui.QDialog):
             self.stream = SoundStream(1024, pyaudio.paInt16, 1, f_sampling)
             self.stream.open_stream("in")
             self.stream.record(self.record_duration)
-            self.frames = self.stream.get_frames()
-
-            #self.file_handle.write()
-            #self.file_handle.seek(0) #return to front of file
+            frames = self.stream.get_frames()
+            self.before.frames = frames
             self.stream.close_stream()
 
-            self.data = np.fromstring(b''.join(self.frames), dtype=np.int16)
+            self.before.data = np.fromstring(b''.join(self.before.frames), dtype=np.int16)
             self.message_user('Recording finished!')
-            self.replot_before()
+            self.before.replot(self.trim, self.record_duration)
             if self.trim == 'a':
-                self.data = autotrimalgo(np.copy(self.data))
-                self.replot_after()
+                self.autotrim()
 
-    def replot_before(self):
-        data = plots.raw(f_sampling, self.data)
-        plot_function(self.figB, data)
-        self.canvasB.draw()
+    def autotrim(self):
+        self.after.data = autotrimalgo(np.copy(self.before.data))
+        self.after.replot(self.trim, self.record_duration)
+        self.after.data2frames()
 
-    def replot_after(self):
-        data = plots.raw(f_sampling, self.data)
-        plot_function(self.figA, data)
-        self.canvasA.draw()
+    def cancel_recording(self):
+        self.before.clear_data()
+        self.after.clear_data()
+        self.disabling_elements(self.trim_radio_buttons, False)
 
-    def clean_temp_data(self):
-        self.file_handle.write(b''.join([]))
-        self.file_handle.seek(0)
-
-    def play(self):
-        if self.data is not None:
+    def play(self, which_one):
+        if which_one == 'b':
+            mode = self.before
+        else:
+            mode = self.after
+        if mode.frames is not None:
             self.stream = SoundStream(1024, pyaudio.paInt16, 1, f_sampling)
             self.stream.open_stream("out")
-            self.stream.play_recording(list(self.frames)) #pass a COPY of list
+            print len(mode.frames)
+            self.stream.play_recording(list(mode.frames)) #pass a COPY of list
         else:
             self.message_user("Record your voice first!")
 
     def save_new_record(self):
         if self.record_name is not None:
-            #self.stream.save_to_file(self.record_name)
-            scipy.io.wavfile.write(RECS_DIR + "/" + self.record_name, f_sampling, self.data)
+            if self.trim == 'n':
+                #self.stream.save_to_file(self.record_name)
+                scipy.io.wavfile.write(RECS_DIR + "/" + self.record_name, f_sampling, self.before.data)
+            else:
+                scipy.io.wavfile.write(RECS_DIR + "/" + self.record_name, f_sampling, self.after.data)
             self.model.insertRows(self.record_name)
             self.accept()
+        else:
+            self.message_user("No recording to save")
 
     def is_data_valid(self):
         if utils.is_valid_path(str(self.record_name_edit.text())):
