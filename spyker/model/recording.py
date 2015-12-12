@@ -1,6 +1,4 @@
-import os
 import pyaudio
-import wave
 import numpy as np
 import matplotlib.pyplot as plt
 import spyker.model.charts as plots
@@ -9,7 +7,6 @@ from spyker.utils.constants import f_sampling
 from PyQt4 import QtGui
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
-from spyker.utils.constants import RECS_DIR
 
 
 class SoundStream(object):
@@ -50,7 +47,6 @@ class SoundStream(object):
             self.frames.append(data)
 
     def play_recording(self, dataframes):
-        #file = wave.open(RECS_DIR + "/" + str(file_name), "rb")
         data = dataframes.pop(0)
         while len(dataframes) != 0:
             self.stream.write(data)
@@ -62,16 +58,6 @@ class SoundStream(object):
         self.stream.close()
         self.handle.terminate()
 
-    # def save_to_file(self, file_name):
-    #     if not os.path.exists(RECS_DIR):
-    #         os.makedirs(RECS_DIR)
-    #     wf = wave.open(RECS_DIR + "/" + str(file_name), 'wb')
-    #     wf.setnchannels(self.channels)
-    #     wf.setsampwidth(self.handle.get_sample_size(self.format))
-    #     wf.setframerate(self.rate)
-    #     wf.writeframes(b''.join(self.frames))  # bytestring join
-    #     wf.close()
-
 
 class TrimCanvas(QtGui.QWidget):
     def __init__(self):
@@ -81,21 +67,15 @@ class TrimCanvas(QtGui.QWidget):
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
         self.frames = None
         self.data = None
+        self.handles = None
+        self.timedata = None
 
-    def hidecanvas(self, state):
-        if not state:
-            self.canvas.show()
-            self.toolbar.show()
-        else:
-            self.canvas.hide()
-            self.toolbar.hide()
-
-    def replot(self, mode, record_duration):
+    def replot(self, mode):
+        data = plots.raw(f_sampling, self.data)
+        self.timedata = data['x_vector']
         if mode == 'm':
-            data = plots.raw(f_sampling, self.data, (record_duration*0.4, record_duration*0.8))
-        else:
-            data = plots.raw(f_sampling, self.data)
-        plot_function(self.figure, data)
+            data['sliders'] = (self.timedata[-1]*0.4, self.timedata[-1]*0.8)
+        self.handles = plot_function(self.figure, data)
         self.canvas.draw()
 
     def clear_data(self):
@@ -133,3 +113,19 @@ def autotrimalgo(data_to_trim):
     cut = cutfront + cutback
     new_data = np.delete(data_to_trim, cut)
     return new_data
+
+def findindex(numpyarray, coord):
+    'finds index using bisection'
+    return np.nonzero(abs(numpyarray-coord) <= 0.00002) #distance between samples if 44100hz sampling recording is used
+
+
+def manualtrimalgo(data_to_trim, timedata, timecoords):
+    'assumes timecoords are already sorted'
+    begin, end = timecoords
+
+    beginindex = findindex(timedata, begin) #return tuple of arrays
+    endindex = findindex(timedata, end)
+
+    beginindex = beginindex[0][0] #array in a tuple can have more than one sample matching condition in findindex func
+    endindex = endindex[0][0]
+    return data_to_trim[beginindex:endindex]

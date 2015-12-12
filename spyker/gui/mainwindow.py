@@ -143,6 +143,5 @@ class MainWindow(QtGui.QWidget):
 
         hbox.addWidget(splitter2)
         self.setLayout(hbox)
-
         self.setGeometry(200, 200, 700, 200)
         self.setWindowTitle('Main window')

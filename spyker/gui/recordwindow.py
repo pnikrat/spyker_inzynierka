@@ -79,9 +79,9 @@ class RecordWindow(QtGui.QDialog):
         self.actions_layout.addWidget(self.cancel_button)
 
         self.ui_layout = QtGui.QHBoxLayout()
-        self.ui_layout.addLayout(self.details_layout)
-        self.ui_layout.addLayout(self.trim_layout)
-        self.ui_layout.addLayout(self.actions_layout)
+        self.ui_layout.addLayout(self.details_layout, 2) #second argument is a stretch factor
+        self.ui_layout.addLayout(self.trim_layout, 1)
+        self.ui_layout.addLayout(self.actions_layout, 2)
 
         self.before_trim_under_layout = QtGui.QHBoxLayout()
         self.before_trim_under_layout.addWidget(self.before.toolbar)
@@ -91,6 +91,9 @@ class RecordWindow(QtGui.QDialog):
         self.before_trim_layout.addWidget(self.before.canvas)
         self.before_trim_layout.addLayout(self.before_trim_under_layout)
 
+        self.befembedding = QtGui.QWidget()
+        self.befembedding.setLayout(self.before_trim_layout)
+
         self.after_trim_under_layout = QtGui.QHBoxLayout()
         self.after_trim_under_layout.addWidget(self.after.toolbar)
         self.after_trim_under_layout.addWidget(self.play_button_after)
@@ -99,26 +102,26 @@ class RecordWindow(QtGui.QDialog):
         self.after_trim_layout.addWidget(self.after.canvas)
         self.after_trim_layout.addLayout(self.after_trim_under_layout)
 
+        self.embedding = QtGui.QWidget()
+        self.embedding.setLayout(self.after_trim_layout)
+
         self.widget_layout = QtGui.QVBoxLayout()
-        self.widget_layout.addLayout(self.ui_layout)
-        self.widget_layout.addWidget(self.ui_message)
-        self.widget_layout.addLayout(self.before_trim_layout)
-        self.widget_layout.addLayout(self.after_trim_layout)
-        self.widget_layout.addWidget(self.apply_button)
+        self.widget_layout.addLayout(self.ui_layout, 0)
+        self.widget_layout.addWidget(self.ui_message, 0)
+        self.widget_layout.addWidget(self.befembedding, 5)
+        self.widget_layout.addWidget(self.embedding, 5)
+        self.widget_layout.addWidget(self.apply_button, 0)
 
         self.setLayout(self.widget_layout)
-        self.setGeometry(200, 200, 700, 500)
         self.setWindowTitle('Add new record')
-
+        self.showMaximized()
         self.hide_canvas()
 
     def hide_canvas(self):
         if self.trim == 'n':
-            self.after.hidecanvas(True)
-            self.play_button_after.hide()
+            self.embedding.hide()
         else:
-            self.after.hidecanvas(False)
-            self.play_button_after.show()
+            self.embedding.show()
 
     def trim_mode_change(self, mode):
         self.trim = mode
@@ -148,13 +151,13 @@ class RecordWindow(QtGui.QDialog):
 
             self.before.data = np.fromstring(b''.join(self.before.frames), dtype=np.int16)
             self.message_user('Recording finished!')
-            self.before.replot(self.trim, self.record_duration)
+            self.before.replot(self.trim)
             if self.trim == 'a':
                 self.autotrim()
 
     def autotrim(self):
         self.after.data = autotrimalgo(np.copy(self.before.data))
-        self.after.replot(self.trim, self.record_duration)
+        self.after.replot(self.trim)
         self.after.data2frames()
 
     def cancel_recording(self):
@@ -170,22 +173,39 @@ class RecordWindow(QtGui.QDialog):
         if mode.frames is not None:
             self.stream = SoundStream(1024, pyaudio.paInt16, 1, f_sampling)
             self.stream.open_stream("out")
-            print len(mode.frames)
             self.stream.play_recording(list(mode.frames)) #pass a COPY of list
         else:
             self.message_user("Record your voice first!")
 
+    def trim_recording(self):
+        if self.before.handles is None:
+            self.message_user('Not in manual mode or nothing to trim yet')
+        else:
+            handles = self.before.handles
+            xpos = []
+            for line in handles:
+                xpos.append(line.get_last_x_pos()[0])
+            xpos.sort()
+            self.after.data = manualtrimalgo(np.copy(self.before.data), np.copy(self.before.timedata), tuple(xpos))
+            self.after.data2frames()
+            self.after.replot('n')
+            self.message_user('Trim successful')
+
     def save_new_record(self):
-        if self.record_name is not None:
-            if self.trim == 'n':
-                #self.stream.save_to_file(self.record_name)
+        if self.trim == 'n':
+            if self.before.data is not None:
                 scipy.io.wavfile.write(RECS_DIR + "/" + self.record_name, f_sampling, self.before.data)
             else:
-                scipy.io.wavfile.write(RECS_DIR + "/" + self.record_name, f_sampling, self.after.data)
-            self.model.insertRows(self.record_name)
-            self.accept()
+                self.message_user("Record yourself first")
+                return
         else:
-            self.message_user("No recording to save")
+            if self.after.data is not None:
+                scipy.io.wavfile.write(RECS_DIR + "/" + self.record_name, f_sampling, self.after.data)
+            else:
+                self.message_user("Record yourself or trim the recording")
+                return
+        self.model.insertRows(self.record_name)
+        self.accept()
 
     def is_data_valid(self):
         if utils.is_valid_path(str(self.record_name_edit.text())):

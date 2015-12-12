@@ -1,3 +1,6 @@
+from spyker.model.draggableplots import DraggableLine
+
+
 def plot_function(fig, data):
 
     fig.clear()
@@ -18,10 +21,18 @@ def plot_function(fig, data):
 
     if len(labels) == 2:
         ax.plot(x_vector, y_vector)
-        if data['sliders'] is not None:
+        if 'sliders' in data:
             slider1XPos, slider2XPos = data['sliders']
-            ax.axvline(x=slider1XPos, color='r')
-            ax.axvline(x=slider2XPos, color='r')
+            leftline = ax.axvline(x=slider1XPos, color='r', linewidth=4)
+            rightline = ax.axvline(x=slider2XPos, color='r', linewidth=4)
+            lines = [leftline, rightline]
+            handles = []
+            for line in lines:
+                h = DraggableLine(line)
+                h.connect()
+                handles.append(h)
+            return handles  # need to return handlers, otherwise they are garbage collected and user cant move sliders
+
     elif len(labels) == 3:
         pax = ax.pcolormesh(y_vector)
         cbar = fig.colorbar(pax)
