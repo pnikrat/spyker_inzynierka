@@ -8,6 +8,7 @@ import scipy.signal
 import numpy
 from scipy.signal import lfilter, hamming
 from scikits.talkbox import lpc
+from matplotlib.mlab import specgram
 
 
 def stft(fs, data, frame_size=0.01, hop=0.05):
@@ -16,13 +17,13 @@ def stft(fs, data, frame_size=0.01, hop=0.05):
     w = scipy.hanning(frame_samp)
     data = scipy.array(
         [np.fft.rfft(w * data[i:i + frame_samp]) for i in range(0, len(data) - frame_samp, hop_samp)])
-    labels = {'xlabel': 'time', 'ylabel': 'amplitude', 'zlabel': 'dwaddddddd'}
+    labels = {'xlabel': 'Time frames [-]', 'ylabel': 'Frequency [Hz]', 'zlabel': 'Amplitude'}
     return {'y_vector': scipy.log10(scipy.absolute(data.T)), 'x_vector': None, 'labels': labels}
 
 
 def mfccoefs(fs, data, nwin=256, nfft=512, nceps=13):
     ceps, mspec, spec = mfcc(data, nwin, nfft, fs, nceps)
-    labels = {'xlabel': 'Coefficient number', 'ylabel': 'Frame number', 'zlabel': 'dwaddddddd'}
+    labels = {'xlabel': 'Coefficient number', 'ylabel': 'Frame number', 'zlabel': ''}
     return {'y_vector': ceps, 'x_vector': None, 'labels': labels}
 
 
@@ -43,19 +44,21 @@ def raw(fs, data):
 
 def fft(fs, data):
     time = np.linspace(0, float(len(data)) / fs, len(data))
-    # data_windowed = scipy.hanning(data)
+    window = scipy.signal.hamming(len(data), False)
+    data = data * window
     compledata_array = np.fft.fft(data, len(data))
-    freq = np.fft.fftfreq(time.shape[-1], 1.0 / fs)
     module = ((compledata_array.real ** 2 + compledata_array.imag ** 2) ** 0.5) / len(data)
+    freq = np.fft.fftfreq(time.shape[-1], 1.0 / fs)
     labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Amplitude [-]'}
     return {'y_vector': module[:(len(module) / 2)], 'x_vector': freq[:(len(freq) / 2)], 'labels': labels}
 
 
 def envelope(fs, data):
-    time = np.linspace(0, float(len(data)) / fs, len(data))
-    env = abs(scipy.signal.hilbert(data))
+    fftdict = fft(fs, data)
+    #time = np.linspace(0, float(len(data)) / fs, len(data))
+    env = abs(scipy.signal.hilbert(fftdict['y_vector']))
     labels = {'xlabel': 'Time [s]', 'ylabel': 'Amplitude [-]'}
-    return {'y_vector': env, 'x_vector': time, 'labels': labels}
+    return {'y_vector': env[:500], 'x_vector': fftdict['x_vector'][:500], 'labels': labels}
 
 
 def formant_freqs_on_fft(fs, data):
@@ -83,3 +86,9 @@ def formant_freqs(fs, data):
     # Get frequencies.
     frqs = sorted(angs * (fs / (2 * math.pi)))
     return frqs[:5]
+
+def stft3d(fs, data):
+    (spectrum, freqs, t) = specgram(data, NFFT=256, Fs=fs)
+    t, freqs = np.meshgrid(t, freqs)
+    labels = {'xlabel' : 'Time [s]', 'ylabel' : 'Frequency [Hz]', 'zlabel' : 'Amplitude [-]'}
+    return {'y_vector': t, 'x_vector': freqs, 'z_vector' : spectrum, 'labels': labels}

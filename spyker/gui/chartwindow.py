@@ -1,5 +1,4 @@
 import inspect
-
 from PyQt4 import QtGui
 from PyQt4.uic.properties import QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -14,11 +13,12 @@ from spyker.utils.utils import get_kwargs
 
 
 class ChartWindow(QtGui.QDialog):
-    def __init__(self, function, filename, parent=None):
+    def __init__(self, function, filename, fname,parent=None):
         super(ChartWindow, self).__init__(parent)
 
         self.kwarg_edits = []
         self.function = function
+        self.fname = fname
         self.filename = filename
         self.fig = plt.figure()
 
@@ -44,6 +44,8 @@ class ChartWindow(QtGui.QDialog):
         self.replot()
         self.setLayout(self.layout)
         self.resize(700, 500)
+
+        self.setWindowTitle('Recording "' + str(self.filename) + '" : ' + str(self.fname))
 
     def replot(self):
         data = self.function(*self.get_args())

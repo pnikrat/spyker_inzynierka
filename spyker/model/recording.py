@@ -1,9 +1,10 @@
 import pyaudio
 import numpy as np
+import wave
 import matplotlib.pyplot as plt
 import spyker.model.charts as plots
 from spyker.utils.pltutils import plot_function
-from spyker.utils.constants import f_sampling
+from spyker.utils.constants import f_sampling, RECS_DIR
 from PyQt4 import QtGui
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
@@ -53,6 +54,14 @@ class SoundStream(object):
             data = dataframes.pop(0)
         self.close_stream()
 
+    def play_wav_recording(self, filename):
+        file = wave.open(RECS_DIR + "/" + str(filename), "rb")
+        data = file.readframes(self.chunk)
+        while data != "":
+            self.stream.write(data)
+            data = file.readframes(self.chunk)
+        self.close_stream()
+
     def close_stream(self):
         self.stream.stop_stream()
         self.stream.close()
@@ -95,7 +104,7 @@ def autotrimalgo(data_to_trim):
     indexlist = []
     indexback, indexfront, index = (0, 0, 0)
     for x in datacopy:
-        if x < 0.01: #change to noise amplitude ?? how to find it out ?
+        if x < 0.05: #change to noise amplitude ?? how to find it out ?
             indexlist.append(index)
         index += 1
     for i in range(0, len(indexlist)):

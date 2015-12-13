@@ -51,7 +51,7 @@ class FileGrid(QtGui.QGridLayout):
         current_recording = self.model.data(self.list_view.currentIndex(), QtCore.Qt.DisplayRole)
         stream = SoundStream(1024, pyaudio.paInt16, 1, 44100)
         stream.open_stream("out")
-        stream.play_recording(current_recording)
+        stream.play_wav_recording(current_recording)
 
 
 class ChartGrid(QtGui.QGridLayout):
@@ -93,7 +93,7 @@ class PlotGrid(QtGui.QGridLayout):
 
     def button_clicked(self):
         try:
-            chart_window = ChartWindow(self.current_chart_value, self.current_recording)
+            chart_window = ChartWindow(self.current_chart_value, self.current_recording, self.current_chart_key)
             chart_window.show()
         except TypeError:
             self.chart_label.setText("Choose chart type and file first!")
