@@ -1,19 +1,19 @@
-from PyQt4 import QtGui
-import pyaudio
 import tempfile
 
-from spyker.model.recording import SoundStream, autotrimalgo
-from spyker.utils.constants import RECS_DIR
-from spyker.gui.chartwindow import ChartWindow
+import matplotlib.pyplot as plt
+import numpy as np
+import pyaudio
+import scipy.io.wavfile
+from PyQt4 import QtGui
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
+
 import spyker.model.charts as plots
 import spyker.utils.utils as utils
-from spyker.utils.pltutils import plot_function
+from spyker.model.recording import SoundStream, autotrimalgo
+from spyker.utils.constants import RECS_DIR
 from spyker.utils.constants import f_sampling
-import matplotlib.pyplot as plt
-import scipy.io.wavfile
-import numpy as np
+from spyker.utils.pltutils import plot_function
 
 
 class RecordWindow(QtGui.QDialog):
@@ -190,7 +190,7 @@ class RecordWindow(QtGui.QDialog):
 
     def save_new_record(self):
         if self.record_name is not None:
-            #self.stream.save_to_file(self.record_name)
+            # self.stream.save_to_file(self.record_name)
             scipy.io.wavfile.write(RECS_DIR + "/" + self.record_name, f_sampling, self.data)
             self.model.insertRows(self.record_name)
             self.accept()

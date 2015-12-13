@@ -9,13 +9,15 @@ import numpy
 from scipy.signal import lfilter, hamming
 from scikits.talkbox import lpc
 
+from spyker.utils.constants import RECS_DIR
+
 
 def stft(fs, data, frame_size=0.01, hop=0.05):
     frame_samp = int(frame_size * fs)
     hop_samp = int(hop * fs)
     w = scipy.hanning(frame_samp)
     data = scipy.array(
-        [np.fft.rfft(w * data[i:i + frame_samp]) for i in range(0, len(data) - frame_samp, hop_samp)])
+            [np.fft.rfft(w * data[i:i + frame_samp]) for i in range(0, len(data) - frame_samp, hop_samp)])
     labels = {'xlabel': 'time', 'ylabel': 'amplitude', 'zlabel': 'dwaddddddd'}
     return {'y_vector': scipy.log10(scipy.absolute(data.T)), 'x_vector': None, 'labels': labels}
 
@@ -83,3 +85,6 @@ def formant_freqs(fs, data):
     # Get frequencies.
     frqs = sorted(angs * (fs / (2 * math.pi)))
     return frqs[:5]
+
+
+

@@ -1,16 +1,16 @@
 import os
 
+import pyaudio
 from PyQt4 import QtGui, QtCore
-from spyker.gui.chartlistview import ChartListView
 
+from spyker.gui.chartlistview import ChartListView
 from spyker.gui.chartwindow import ChartWindow
+from spyker.gui.dialogwindow import DialogWindow
 from spyker.gui.filebutton import FileButton
 from spyker.gui.filelistview import FileListView
 from spyker.gui.recordwindow import RecordWindow
-from spyker.gui.dialogwindow import DialogWindow
-from spyker.utils.constants import RECS_DIR
 from spyker.model.recording import SoundStream
-import pyaudio
+from spyker.utils.constants import RECS_DIR
 
 
 class FileGrid(QtGui.QGridLayout):
