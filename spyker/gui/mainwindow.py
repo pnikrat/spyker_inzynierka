@@ -76,7 +76,6 @@ class PlotGrid(QtGui.QGridLayout):
         self.current_chart_value = None
         self.current_recording = None
         self.setColumnMinimumWidth(1, 200)
-        #self.plot_windows = []
 
         self.file_label = QtGui.QLabel('Current file is: None')
 
@@ -92,11 +91,11 @@ class PlotGrid(QtGui.QGridLayout):
         self.addWidget(self.plot_button, 2, 0, 1, 2)
 
     def button_clicked(self):
-        try:
+        # try:
             chart_window = ChartWindow(self.current_chart_value, self.current_recording)
             chart_window.show()
-        except TypeError:
-            self.chart_label.setText("Choose chart type and file first!")
+        # except TypeError:
+        #     self.chart_label.setText("Choose chart type and file first!")
 
     def labels_change(self):
         self.current_recording = self.Fmodel.data(self.Fview.currentIndex(), QtCore.Qt.DisplayRole)

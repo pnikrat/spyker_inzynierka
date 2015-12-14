@@ -13,7 +13,7 @@ if __name__ == '__main__':
                               ChartType.FFT: plots.fft,
                               ChartType.MFCC: plots.mfccoefs,
                               ChartType.STFT: plots.stft,
-                              ChartType.FORMANT_FREQS: plots.formant_freqs_on_fft})
+                              ChartType.FORMANTS: plots.formant_freqs_on_fft})
 
     chart_list_model = ChartListModel(chart_dict)
     file_list_model = FileListModel()
