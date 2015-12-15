@@ -1,7 +1,6 @@
 import inspect
 
 import matplotlib.pyplot as plt
-import numpy
 import scipy.io.wavfile
 import scipy.signal
 from PyQt4 import QtGui
@@ -16,17 +15,17 @@ from spyker.utils.utils import get_kwargs
 
 
 class ChartWindow(QtGui.QDialog):
-    def __init__(self, function, filename, parent=None):
+    def __init__(self, function, filename, fname, parent=None):
         super(ChartWindow, self).__init__(parent)
         self.function = function
+        self.fname = fname
         self.filename = filename
         self.init_figure()
         self.init_ui()
-        self.init_cursors()
 
     def init_ui(self):
         self.init_layout()
-        self.replot()
+        self.init_plot()
         self.resize(1000, 600)
 
     def init_layout(self):
@@ -59,7 +58,6 @@ class ChartWindow(QtGui.QDialog):
     def init_controls_layout(self):
         self.controls_layout = QtGui.QVBoxLayout()
         self.init_params_layout()
-        self.init_cursors_layout()
         self.layout.addLayout(self.controls_layout)
 
     def init_params_layout(self):
@@ -95,16 +93,27 @@ class ChartWindow(QtGui.QDialog):
                 lambda: plt_single(self.fig, self.data, self.y_cursor_layout.slider.value(), 'y'))
         self.y_cursor_layout.button.clicked.connect(self.canvas.draw)
 
+        self.setWindowTitle('Recording "' + str(self.filename) + '" : ' + str(self.fname))
+
+    def init_plot(self):
+        self.replot()
+        if len(self.data['labels']) == 3:
+            self.init_cursors_layout()
+            self.init_cursors()
+            self.update_sliders()
+
     def replot(self):
         self.data = self.function(*self.get_args())
         plot_function(self.fig, self.data)
 
-        self.update_sliders(len(self.data['y_vector'][0]) - 1, len(self.data['y_vector']) - 1)
+        if hasattr(self, 'x_cursor_layout'):
+            self.update_sliders()
+
         self.canvas.draw()
 
-    def update_sliders(self, xmax, ymax):
-        self.x_cursor_layout.set_maximum(xmax)
-        self.y_cursor_layout.set_maximum(ymax)
+    def update_sliders(self):
+        self.x_cursor_layout.set_maximum(len(self.data['y_vector'][0]) - 1)
+        self.y_cursor_layout.set_maximum(len(self.data['y_vector']) - 1)
 
     def add_kwarg_fields(self):
         if inspect.getargspec(self.function).defaults is not None:
