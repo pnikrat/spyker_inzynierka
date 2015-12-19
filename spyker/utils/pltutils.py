@@ -2,6 +2,7 @@ from matplotlib import cm
 from spyker.model.draggableplots import DraggableLine
 from mpl_toolkits.mplot3d import Axes3D
 
+
 def plot_function(fig, data):
     fig.clear()
 
@@ -41,7 +42,8 @@ def plot_function(fig, data):
             cbar.ax.set_ylabel(labels.get('zlabel'))
             ax.autoscale(enable=True, axis='both', tight=True)
     else:
-        surf = ax.plot_surface(y_vector, x_vector, z_vector, rstride=5, cstride=5, cmap=cm.coolwarm, linewidth=0)
+        ax.autoscale(enable=True, axis='both', tight=True)
+        surf = ax.plot_surface(y_vector, x_vector, z_vector, rstride=2, cstride=2, cmap=cm.coolwarm, linewidth=0)
         fig.colorbar(surf)
 
 

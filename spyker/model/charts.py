@@ -46,21 +46,21 @@ def fft(fs, data):
     time = np.linspace(0, float(len(data)) / fs, len(data))
     window = scipy.signal.hamming(len(data), False)
     data = data * window
-    compledata_array = np.fft.fft(data, len(data))
+    compledata_array = np.fft.rfft(data)
     module = ((compledata_array.real ** 2 + compledata_array.imag ** 2) ** 0.5) / len(data)
-    freq = np.fft.fftfreq(time.shape[-1], 1.0 / fs)
-    module = module[:(len(module) / 2)]
-    freq = freq[:(len(freq) / 2)]
+    freq = np.fft.rfftfreq(time.shape[-1], 1.0 / fs)
+    #module = module[:(len(module) / 2)]
+    #freq = freq[:(len(freq) / 2)]
     labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Amplitude [-]'}
     return {'y_vector': module[:6000], 'x_vector': freq[:6000], 'labels': labels}
 
 
 def envelope(fs, data):
     fftdict = fft(fs, data)
-    # time = np.linspace(0, float(len(data)) / fs, len(data))
+
     env = abs(scipy.signal.hilbert(fftdict['y_vector']))
     labels = {'xlabel': 'Time [s]', 'ylabel': 'Amplitude [-]'}
-    return {'y_vector': env[:500], 'x_vector': fftdict['x_vector'][:500], 'labels': labels}
+    return {'y_vector': env[:1000], 'x_vector': fftdict['x_vector'][:1000], 'labels': labels}
 
 
 def formant_freqs_on_fft(fs, data):
@@ -92,7 +92,14 @@ def formant_freqs(fs, data):
 
 
 def stft3d(fs, data):
-    (spectrum, freqs, t) = specgram(data, NFFT=256, Fs=fs)
-    t, freqs = np.meshgrid(t, freqs)
-    labels = {'xlabel': 'Time [s]', 'ylabel': 'Frequency [Hz]', 'zlabel': 'Amplitude [-]'}
-    return {'y_vector': t, 'x_vector': freqs, 'z_vector': spectrum, 'labels': labels}
+    (spectrum, freqs, t) = specgram(data, Fs=fs, NFFT=512, sides='onesided', mode='magnitude')
+    spectrum = spectrum / len(data)
+    freqs = freqs[:58]
+    spectrum = spectrum[:58, :]
+    dimR, dimC = spectrum.shape
+    time = np.linspace(0, float(len(data)) / fs, dimC)
+
+    time, freqs = np.meshgrid(time, freqs, sparse=True)
+
+    labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Time [s]', 'zlabel': 'Amplitude [-]'}
+    return {'y_vector': freqs, 'x_vector': time, 'z_vector': spectrum, 'labels': labels}
