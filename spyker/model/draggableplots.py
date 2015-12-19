@@ -7,7 +7,7 @@ class DraggableLine(object):
         self.last_x_pos_other = self.otherline.get_xdata()
         self.interval = interval
         self.limits = self.line.figure.axes[0].get_xlim()
-        
+
     def get_last_x_pos(self):
         return self.last_x_pos, self.last_x_pos_other
 

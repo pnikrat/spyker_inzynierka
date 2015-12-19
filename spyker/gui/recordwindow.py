@@ -169,25 +169,28 @@ class RecordWindow(QtGui.QDialog):
 
     def record(self):
         if self.is_data_valid():
-            self.disabling_elements(self.trim_radio_buttons, True)
+            if self.record_name_edit.text() not in self.model.file_paths:
+                self.disabling_elements(self.trim_radio_buttons, True)
 
-            self.message_user("Recording!") #NOT WORKING!
-            self.record_duration = int(self.record_duration_spin.value())
-            self.record_name = self.record_name_edit.text()
+                self.message_user("Recording!") #NOT WORKING!
+                self.record_duration = int(self.record_duration_spin.value())
+                self.record_name = self.record_name_edit.text()
 
-            self.stream = SoundStream(1024, pyaudio.paInt16, 1, f_sampling)
-            self.stream.open_stream("in")
-            self.stream.record(self.record_duration)
-            frames = self.stream.get_frames()
-            self.before.frames = frames
-            self.stream.close_stream()
+                self.stream = SoundStream(1024, pyaudio.paInt16, 1, f_sampling)
+                self.stream.open_stream("in")
+                self.stream.record(self.record_duration)
+                frames = self.stream.get_frames()
+                self.before.frames = frames
+                self.stream.close_stream()
 
-            self.before.data = np.fromstring(b''.join(self.before.frames), dtype=np.int16)
-            self.message_user('Recording finished!')
-            self.before.interval = self.interval_spin.value()
-            self.before.replot(self.trim)
-            if self.trim == 'a':
-                self.autotrim()
+                self.before.data = np.fromstring(b''.join(self.before.frames), dtype=np.int16)
+                self.message_user('Recording finished!')
+                self.before.interval = self.interval_spin.value()
+                self.before.replot(self.trim)
+                if self.trim == 'a':
+                    self.autotrim()
+            else:
+                self.message_user('Recording ' + self.record_name_edit.text() + ' already exists!')
 
     def autotrim(self):
         self.after.data = autotrimalgo(np.copy(self.before.data))
