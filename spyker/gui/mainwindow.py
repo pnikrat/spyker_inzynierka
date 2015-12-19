@@ -132,6 +132,8 @@ class MainWindow(QtGui.QWidget):
         plot_frame.setLayout(plot_grid)
         chart_grid.list_view.clicked.connect(plot_grid.labels_change)
         file_grid.list_view.clicked.connect(plot_grid.labels_change)
+        file_grid.list_view.doubleClicked.connect(file_grid.play_recording)
+        chart_grid.list_view.doubleClicked.connect(plot_grid.button_clicked)
 
         splitter2 = QtGui.QSplitter(QtCore.Qt.Horizontal)
         splitter2.addWidget(splitter1)

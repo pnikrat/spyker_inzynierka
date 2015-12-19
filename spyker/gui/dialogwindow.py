@@ -22,7 +22,7 @@ class DialogWindow(QtGui.QDialog):
         grid.addWidget(self.no_button, 1, 1)
 
         self.setLayout(grid)
-        self.setGeometry(100, 100, 100, 100)
+        self.setGeometry(200, 200, 100, 100)
         self.setWindowTitle('Confirm')
 
     def no_decision(self):

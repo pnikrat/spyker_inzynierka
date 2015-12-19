@@ -49,8 +49,10 @@ def fft(fs, data):
     compledata_array = np.fft.fft(data, len(data))
     module = ((compledata_array.real ** 2 + compledata_array.imag ** 2) ** 0.5) / len(data)
     freq = np.fft.fftfreq(time.shape[-1], 1.0 / fs)
+    module = module[:(len(module) / 2)]
+    freq = freq[:(len(freq) / 2)]
     labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Amplitude [-]'}
-    return {'y_vector': module[:(len(module) / 2)], 'x_vector': freq[:(len(freq) / 2)], 'labels': labels}
+    return {'y_vector': module[:6000], 'x_vector': freq[:6000], 'labels': labels}
 
 
 def envelope(fs, data):

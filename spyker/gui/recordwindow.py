@@ -50,7 +50,7 @@ class RecordWindow(QtGui.QDialog):
         self.interval_label = QtGui.QLabel('Trim interval length')
         self.interval_spin = QtGui.QSpinBox()
         self.interval_spin.setValue(1)
-        self.interval_spin.setRange(1, 3)
+        self.interval_spin.setRange(1, 1)
         self.interval_spin.valueChanged.connect(lambda : self.int_spin())
 
         self.record_button = QtGui.QPushButton('Record')
@@ -162,10 +162,10 @@ class RecordWindow(QtGui.QDialog):
             x.setDisabled(state)
 
     def rec_spin(self):
-        self.interval_spin.setValue(self.record_duration_spin.value() - 1)
+        self.interval_spin.setRange(1, self.record_duration_spin.value() - 1)
 
     def int_spin(self):
-        self.record_duration_spin.setValue(self.interval_spin.value() + 1)
+        pass
 
     def record(self):
         if self.is_data_valid():

@@ -27,6 +27,7 @@ class ChartWindow(QtGui.QDialog):
         self.init_layout()
         self.init_plot()
         self.resize(1000, 600)
+        self.setWindowTitle('Recording "' + str(self.filename) + '" : ' + str(self.fname))
 
     def init_layout(self):
         self.layout = QtGui.QHBoxLayout()
@@ -93,7 +94,7 @@ class ChartWindow(QtGui.QDialog):
                 lambda: plt_single(self.fig, self.data, self.y_cursor_layout.slider.value(), 'y'))
         self.y_cursor_layout.button.clicked.connect(self.canvas.draw)
 
-        self.setWindowTitle('Recording "' + str(self.filename) + '" : ' + str(self.fname))
+
 
     def init_plot(self):
         self.replot()
