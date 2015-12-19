@@ -65,8 +65,7 @@ def formant_freqs_on_fft(fs, data):
     return dict(fft(fs, data).items() + {'cursors': formant_freqs(fs, data)}.items())
 
 
-
-#na usrednionym widmie gestości mocy,
+ #na usrednionym widmie gestosci mocy
 def formant_freqs(fs, data):
     N = len(data)
     w = numpy.hamming(N)

@@ -26,6 +26,7 @@ class RecordWindow(QtGui.QDialog):
 
         self.record_name = None
         self.record_duration = None
+        self.currently_playing = False
         self.stream = None
         self.model = model
         self.trim = 'n'
@@ -39,8 +40,18 @@ class RecordWindow(QtGui.QDialog):
         self.record_name_label = QtGui.QLabel('Name')
         self.record_name_edit = QtGui.QLineEdit()
 
-        self.record_duration_label = QtGui.QLabel('Length')
-        self.record_duration_edit = QtGui.QLineEdit()
+        self.record_duration_label = QtGui.QLabel('Recording length')
+        #self.record_duration_edit = QtGui.QLineEdit()
+        self.record_duration_spin = QtGui.QSpinBox()
+        self.record_duration_spin.setValue(2)
+        self.record_duration_spin.setRange(2, 4)
+        self.record_duration_spin.valueChanged.connect(lambda: self.rec_spin())
+
+        self.interval_label = QtGui.QLabel('Trim interval length')
+        self.interval_spin = QtGui.QSpinBox()
+        self.interval_spin.setValue(1)
+        self.interval_spin.setRange(1, 3)
+        self.interval_spin.valueChanged.connect(lambda : self.int_spin())
 
         self.record_button = QtGui.QPushButton('Record')
         self.record_button.clicked.connect(lambda: self.record())
@@ -80,7 +91,9 @@ class RecordWindow(QtGui.QDialog):
         self.details_layout.addWidget(self.record_name_label, 0, 0)
         self.details_layout.addWidget(self.record_name_edit, 0, 1)
         self.details_layout.addWidget(self.record_duration_label, 1, 0)
-        self.details_layout.addWidget(self.record_duration_edit, 1, 1)
+        self.details_layout.addWidget(self.record_duration_spin, 1, 1)
+        self.details_layout.addWidget(self.interval_label, 2, 0)
+        self.details_layout.addWidget(self.interval_spin, 2, 1)
 
         self.trim_layout = QtGui.QVBoxLayout()
         self.trim_layout.addWidget(self.trim_none)
@@ -148,12 +161,18 @@ class RecordWindow(QtGui.QDialog):
         for x in elements:
             x.setDisabled(state)
 
+    def rec_spin(self):
+        self.interval_spin.setValue(self.record_duration_spin.value() - 1)
+
+    def int_spin(self):
+        self.record_duration_spin.setValue(self.interval_spin.value() + 1)
+
     def record(self):
         if self.is_data_valid():
             self.disabling_elements(self.trim_radio_buttons, True)
 
             self.message_user("Recording!") #NOT WORKING!
-            self.record_duration = int(self.record_duration_edit.text())
+            self.record_duration = int(self.record_duration_spin.value())
             self.record_name = self.record_name_edit.text()
 
             self.stream = SoundStream(1024, pyaudio.paInt16, 1, f_sampling)
@@ -165,6 +184,7 @@ class RecordWindow(QtGui.QDialog):
 
             self.before.data = np.fromstring(b''.join(self.before.frames), dtype=np.int16)
             self.message_user('Recording finished!')
+            self.before.interval = self.interval_spin.value()
             self.before.replot(self.trim)
             if self.trim == 'a':
                 self.autotrim()
@@ -180,16 +200,24 @@ class RecordWindow(QtGui.QDialog):
         self.disabling_elements(self.trim_radio_buttons, False)
 
     def play(self, which_one):
+        self.play_button_before.setEnabled(False)
+        self.play_button_after.setEnabled(False)
+        QtGui.QApplication.processEvents()
+
         if which_one == 'b':
             mode = self.before
         else:
             mode = self.after
         if mode.frames is not None:
-            self.stream = SoundStream(1024, pyaudio.paInt16, 1, f_sampling)
-            self.stream.open_stream("out")
-            self.stream.play_recording(list(mode.frames)) #pass a COPY of list
+            stream = SoundStream(1024, pyaudio.paInt16, 1, f_sampling)
+            stream.open_stream("out")
+            stream.play_recording(list(mode.frames)) #pass a COPY of list
         else:
             self.message_user("Record your voice first!")
+
+        self.play_button_after.setEnabled(True)
+        self.play_button_before.setEnabled(True)
+        QtGui.QApplication.processEvents()
 
     def trim_recording(self):
         if self.before.handles is None:
@@ -197,8 +225,9 @@ class RecordWindow(QtGui.QDialog):
         else:
             handles = self.before.handles
             xpos = []
-            for line in handles:
-                xpos.append(line.get_last_x_pos()[0])
+            pos1, pos2 = handles.get_last_x_pos()
+            xpos.append(pos1[0])
+            xpos.append(pos2[0])
             xpos.sort()
             self.after.data = manualtrimalgo(np.copy(self.before.data), np.copy(self.before.timedata), tuple(xpos))
             self.after.data2frames()
@@ -223,7 +252,7 @@ class RecordWindow(QtGui.QDialog):
 
     def is_data_valid(self):
         if utils.is_valid_path(str(self.record_name_edit.text())):
-            if utils.is_number(self.record_duration_edit.text()):
+            if utils.is_number(self.record_duration_spin.value()):
                 return True
             else:
                 self.message_user("Length must be a valid integer")

@@ -1,6 +1,6 @@
 from matplotlib import cm
 from spyker.model.draggableplots import DraggableLine
-
+from mpl_toolkits.mplot3d import Axes3D
 
 def plot_function(fig, data):
     fig.clear()
@@ -27,16 +27,13 @@ def plot_function(fig, data):
         if len(labels) == 2:
             ax.plot(x_vector, y_vector)
             if 'sliders' in data:
-                slider1XPos, slider2XPos = data['sliders']
+                slider1XPos, slider2XPos, interval = data['sliders']
                 leftline = ax.axvline(x=slider1XPos, color='r', linewidth=4)
                 rightline = ax.axvline(x=slider2XPos, color='r', linewidth=4)
-                lines = [leftline, rightline]
-                handlers = []
-                for line in lines:
-                    h = DraggableLine(line)
-                    h.connect()
-                    handlers.append(h)
-                return handlers  # need to return handlers, otherwise they are garbage collected and user cant move sliders
+
+                h = DraggableLine(leftline, rightline, interval)
+                h.connect()
+                return h  # need to return handlers, otherwise they are garbage collected and user cant move sliders
 
         elif len(labels) == 3:
             pax = ax.pcolormesh(y_vector)
