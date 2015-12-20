@@ -9,17 +9,20 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 
 from spyker.gui.entrylayout import EntryLayout
+from spyker.gui.filepicker import FilePicker
+from spyker.listeners.filepickerlistener import FilePickerListener
 from spyker.utils.constants import RECS_DIR
 from spyker.utils.pltutils import *
 from spyker.utils.utils import get_kwargs
 
 
-class ChartWindow(QtGui.QDialog):
-    def __init__(self, function, filename, fname, parent=None):
+class ChartWindow(QtGui.QMainWindow, FilePickerListener):
+    def __init__(self, function, filename, fname, file_list_model, parent=None):
         super(ChartWindow, self).__init__(parent)
         self.function = function
         self.fname = fname
         self.filename = filename
+        self.file_list_model = file_list_model
         self.init_figure()
         self.init_ui()
 
@@ -33,18 +36,17 @@ class ChartWindow(QtGui.QDialog):
         self.layout = QtGui.QHBoxLayout()
         self.init_plot_layout()
         self.init_controls_layout()
+        self.init_menu()
 
-        self.setLayout(self.layout)
+        window = QtGui.QWidget()
+        window.setLayout(self.layout)
+        self.setCentralWidget(window)
 
     def init_figure(self):
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(1, 1, 1)
         self.vline = self.ax.axvline(color='r')
         self.hline = self.ax.axhline(color='y')
-
-        # cursor = Cursor(ax)
-        # cursor = SnaptoCursor(ax, t, s)
-        # plt.connect('motion_notify_event', cursor.mouse_move)
 
     def init_plot_layout(self):
 
@@ -77,7 +79,7 @@ class ChartWindow(QtGui.QDialog):
         self.cursors_layout = QtGui.QVBoxLayout()
         self.cursors_layout.setAlignment(Qt.AlignTop)
 
-        self.x_cursor_layout = EntryLayout('x cursor', )
+        self.x_cursor_layout = EntryLayout('x cursor')
         self.y_cursor_layout = EntryLayout('y cursor')
 
         self.cursors_layout.addLayout(self.x_cursor_layout)
@@ -94,7 +96,30 @@ class ChartWindow(QtGui.QDialog):
                 lambda: plt_single(self.fig, self.data, self.y_cursor_layout.slider.value(), 'y'))
         self.y_cursor_layout.button.clicked.connect(self.canvas.draw)
 
+    def init_menu(self):
 
+        addAction = QtGui.QAction('&Add', self)
+        addAction.setShortcut('Ctrl+A')
+        addAction.setStatusTip('Add signal')
+        addAction.triggered.connect(self.show_file_list)
+
+        subtractAction = QtGui.QAction('&Subtract', self)
+        subtractAction.setShortcut('Ctrl+S')
+        subtractAction.setStatusTip('Subtract signal')
+        subtractAction.triggered.connect(self.show_file_list)
+
+        exitAction = QtGui.QAction('&Exit', self)
+        exitAction.setShortcut('Ctrl+Q')
+        exitAction.setStatusTip('Exit application')
+        exitAction.triggered.connect(self.close)
+
+        self.statusBar()
+
+        menubar = self.menuBar()
+        fileMenu = menubar.addMenu('&File')
+        fileMenu.addAction(addAction)
+        fileMenu.addAction(subtractAction)
+        fileMenu.addAction(exitAction)
 
     def init_plot(self):
         self.replot()
@@ -113,9 +138,7 @@ class ChartWindow(QtGui.QDialog):
         self.canvas.draw()
 
     def update_sliders(self):
-        #self.x_cursor_layout.set_maximum(len(self.data['y_vector'][0]) - 1)
-        #zakomentowalem bo w stft3D y_vector nie jest macierza, jest wektorem i wyrzucalo tu blad
-        # nie lepiej jakbys w stft zwyklym podzielil odpowiednio macierz i wrzucil osobne wektory do x_vector i y_vector ?
+        self.x_cursor_layout.set_maximum(len(self.data['y_vector'][0]) - 1)
         self.y_cursor_layout.set_maximum(len(self.data['y_vector']) - 1)
 
     def add_kwarg_fields(self):
@@ -139,23 +162,9 @@ class ChartWindow(QtGui.QDialog):
             args.append(float(kwarg_edit.text()))
         return args
 
-# class Cursor(object):
-#     def __init__(self, ax):
-#         self.ax = ax
-#         self.lx = ax.axhline(color='k')  # the horiz line
-#         self.ly = ax.axvline(color='k')  # the vert line
-#
-#         # text location in axes coords
-#         # self.txt = ax.text(0.7, 0.9, '', transform=ax.transAxes)
-#
-#     def mouse_move(self, event):
-#         if not event.inaxes:
-#             return
-#
-#         x, y = event.xdata, event.ydata
-#         # update the line positions
-#         self.lx.set_ydata(y)
-#         self.ly.set_xdata(x)
-#
-#         # self.txt.set_text('x=%1.2f, y=%1.2f' % (x, y))
-#         plt.draw()
+    def show_file_list(self):
+        self.pick_file_dialog = FilePicker(self.file_list_model, self)
+        self.pick_file_dialog.show()
+
+    def file_picked(self, file_name):
+        print file_name

@@ -1,7 +1,6 @@
 import sys
 from collections import OrderedDict
 
-import matplotlib
 from PyQt4 import QtGui
 
 import spyker.model.charts as plots

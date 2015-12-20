@@ -1,23 +1,12 @@
-import tempfile
-
-import matplotlib.pyplot as plt
 import numpy as np
-import pyaudio
 import scipy.io.wavfile
-from PyQt4 import QtGui
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
+import scipy.io.wavfile
 
-import spyker.model.charts as plots
-from spyker.model.recording import *
-from spyker.utils.constants import RECS_DIR
 import spyker.utils.utils as utils
+from spyker.model.recording import *
 from spyker.model.recording import SoundStream, autotrimalgo
 from spyker.utils.constants import RECS_DIR
 from spyker.utils.constants import f_sampling
-from spyker.utils.pltutils import plot_function
-import scipy.io.wavfile
-import numpy as np
 
 
 class RecordWindow(QtGui.QDialog):

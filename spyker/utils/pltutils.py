@@ -1,6 +1,6 @@
 from matplotlib import cm
+
 from spyker.model.draggableplots import DraggableLine
-from mpl_toolkits.mplot3d import Axes3D
 
 
 def plot_function(fig, data):

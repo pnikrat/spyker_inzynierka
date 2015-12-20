@@ -1,6 +1,6 @@
-from collections import OrderedDict
 import inspect
 import os
+from collections import OrderedDict
 
 
 def is_valid_path(path):

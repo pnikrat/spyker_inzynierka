@@ -92,7 +92,7 @@ class PlotGrid(QtGui.QGridLayout):
 
     def button_clicked(self):
         # try:
-            chart_window = ChartWindow(self.current_chart_value, self.current_recording, self.current_chart_key)
+            chart_window = ChartWindow(self.current_chart_value, self.current_recording, self.current_chart_key, self.Fmodel)
             chart_window.show()
         # except TypeError:
         #     self.chart_label.setText("Choose chart type and file first!")

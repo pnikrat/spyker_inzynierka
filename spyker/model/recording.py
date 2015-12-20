@@ -1,13 +1,15 @@
-import pyaudio
-import numpy as np
 import wave
+
 import matplotlib.pyplot as plt
-import spyker.model.charts as plots
-from spyker.utils.pltutils import plot_function
-from spyker.utils.constants import f_sampling, RECS_DIR
+import numpy as np
+import pyaudio
 from PyQt4 import QtGui
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
+
+import spyker.model.charts as plots
+from spyker.utils.constants import f_sampling, RECS_DIR
+from spyker.utils.pltutils import plot_function
 
 
 class SoundStream(object):
