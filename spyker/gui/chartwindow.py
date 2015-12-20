@@ -1,5 +1,6 @@
 import inspect
 
+import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io.wavfile
 import scipy.signal
@@ -17,11 +18,12 @@ from spyker.utils.utils import get_kwargs
 
 
 class ChartWindow(QtGui.QMainWindow, FilePickerListener):
-    def __init__(self, function, filename, fname, file_list_model, parent=None):
+    def __init__(self, function, file_name, function_name, file_list_model, parent=None):
         super(ChartWindow, self).__init__(parent)
         self.function = function
-        self.fname = fname
-        self.filename = filename
+        self.function_name = function_name
+        self.file_names = []
+        self.file_names.append(file_name)
         self.file_list_model = file_list_model
         self.init_figure()
         self.init_ui()
@@ -30,7 +32,7 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
         self.init_layout()
         self.init_plot()
         self.resize(1000, 600)
-        self.setWindowTitle('Recording "' + str(self.filename) + '" : ' + str(self.fname))
+        self.setWindowTitle('Recording "' + str(self.file_names[0]) + '" : ' + str(self.function_name))
 
     def init_layout(self):
         self.layout = QtGui.QHBoxLayout()
@@ -156,7 +158,17 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
                 self.params_layout.addLayout(h_box_layout)
 
     def get_args(self):
-        fs, data = scipy.io.wavfile.read(RECS_DIR + '/' + self.filename)
+        data = np.array([0])
+        for file_name in self.file_names:
+            fs, file_data = scipy.io.wavfile.read(RECS_DIR + '/' + file_name)
+
+            if data.shape > file_data.shape:
+                file_data.resize(data.shape)
+            elif data.shape < file_data.shape:
+                data.resize(file_data.shape)
+
+            data += file_data
+
         args = [fs, data]
         for kwarg_edit in self.kwarg_edits:
             args.append(float(kwarg_edit.text()))
@@ -166,5 +178,5 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
         self.pick_file_dialog = FilePicker(self.file_list_model, self)
         self.pick_file_dialog.show()
 
-    def file_picked(self, file_name):
-        print file_name
+    def file_picked(self, picked_file):
+        self.file_names.append(picked_file)

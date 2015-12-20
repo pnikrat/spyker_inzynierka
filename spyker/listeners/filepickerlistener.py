@@ -1,3 +1,3 @@
 class FilePickerListener:
-    def file_picked(self, file_name):
-        raise NotImplementedError("Should have implemented this")
+    def file_picked(self, picked_file):
+        raise NotImplementedError("file_picked not implemented")
