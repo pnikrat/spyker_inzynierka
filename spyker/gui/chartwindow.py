@@ -22,9 +22,11 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
         super(ChartWindow, self).__init__(parent)
         self.function = function
         self.function_name = function_name
-        self.file_names = []
-        self.file_names.append(file_name)
+        self.file_name = file_name
+        self.additional_file = None
         self.file_list_model = file_list_model
+        self.fs, self.data = scipy.io.wavfile.read(RECS_DIR + '/' + self.file_name)
+
         self.init_figure()
         self.init_ui()
 
@@ -32,7 +34,7 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
         self.init_layout()
         self.init_plot()
         self.resize(1000, 600)
-        self.setWindowTitle('Recording "' + str(self.file_names[0]) + '" : ' + str(self.function_name))
+        self.setWindowTitle('Recording "' + str(self.file_name) + '" : ' + str(self.function_name))
 
     def init_layout(self):
         self.layout = QtGui.QHBoxLayout()
@@ -91,11 +93,11 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
 
     def init_cursors(self):
         self.x_cursor_layout.button.clicked.connect(
-                lambda: plt_single(self.fig, self.data, self.x_cursor_layout.slider.value(), 'x'))
+                lambda: plt_single(self.fig, self.plot_data, self.x_cursor_layout.slider.value(), 'x'))
         self.x_cursor_layout.button.clicked.connect(self.canvas.draw)
 
         self.y_cursor_layout.button.clicked.connect(
-                lambda: plt_single(self.fig, self.data, self.y_cursor_layout.slider.value(), 'y'))
+                lambda: plt_single(self.fig, self.plot_data, self.y_cursor_layout.slider.value(), 'y'))
         self.y_cursor_layout.button.clicked.connect(self.canvas.draw)
 
     def init_menu(self):
@@ -103,12 +105,12 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
         addAction = QtGui.QAction('&Add', self)
         addAction.setShortcut('Ctrl+A')
         addAction.setStatusTip('Add signal')
-        addAction.triggered.connect(self.show_file_list)
+        addAction.triggered.connect(lambda: self.pick_file(1))
 
         subtractAction = QtGui.QAction('&Subtract', self)
         subtractAction.setShortcut('Ctrl+S')
         subtractAction.setStatusTip('Subtract signal')
-        subtractAction.triggered.connect(self.show_file_list)
+        subtractAction.triggered.connect(lambda: self.pick_file(-1))
 
         exitAction = QtGui.QAction('&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
@@ -125,14 +127,14 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
 
     def init_plot(self):
         self.replot()
-        if len(self.data['labels']) == 3:
+        if len(self.plot_data['labels']) == 3:
             self.init_cursors_layout()
             self.init_cursors()
             self.update_sliders()
 
     def replot(self):
-        self.data = self.function(*self.get_args())
-        plot_function(self.fig, self.data)
+        self.plot_data = self.function(*self.get_args())
+        plot_function(self.fig, self.plot_data)
 
         if hasattr(self, 'x_cursor_layout'):
             self.update_sliders()
@@ -140,8 +142,8 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
         self.canvas.draw()
 
     def update_sliders(self):
-        self.x_cursor_layout.set_maximum(len(self.data['y_vector'][0]) - 1)
-        self.y_cursor_layout.set_maximum(len(self.data['y_vector']) - 1)
+        self.x_cursor_layout.set_maximum(len(self.plot_data['y_vector'][0]) - 1)
+        self.y_cursor_layout.set_maximum(len(self.plot_data['y_vector']) - 1)
 
     def add_kwarg_fields(self):
         if inspect.getargspec(self.function).defaults is not None:
@@ -158,25 +160,26 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
                 self.params_layout.addLayout(h_box_layout)
 
     def get_args(self):
-        data = np.array([0])
-        for file_name in self.file_names:
-            fs, file_data = scipy.io.wavfile.read(RECS_DIR + '/' + file_name)
+        if self.additional_file is not None:
+            fs, file_data = scipy.io.wavfile.read(RECS_DIR + '/' + self.additional_file)
 
-            if data.shape > file_data.shape:
-                file_data.resize(data.shape)
-            elif data.shape < file_data.shape:
-                data.resize(file_data.shape)
+            if self.data.shape > file_data.shape:
+                file_data.resize(self.data.shape)
+            elif self.data.shape < file_data.shape:
+                self.data.resize(file_data.shape)
 
-            data += file_data
+            self.data = self.data + self.multiplier * file_data
 
-        args = [fs, data]
+        print self.data
+        args = [self.fs, self.data]
         for kwarg_edit in self.kwarg_edits:
             args.append(float(kwarg_edit.text()))
         return args
 
-    def show_file_list(self):
+    def pick_file(self, multiplier):
         self.pick_file_dialog = FilePicker(self.file_list_model, self)
         self.pick_file_dialog.show()
+        self.multiplier = multiplier
 
     def file_picked(self, picked_file):
-        self.file_names.append(picked_file)
+        self.additional_file = picked_file
