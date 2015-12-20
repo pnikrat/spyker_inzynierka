@@ -113,9 +113,7 @@ class ChartWindow(QtGui.QDialog):
         self.canvas.draw()
 
     def update_sliders(self):
-        #self.x_cursor_layout.set_maximum(len(self.data['y_vector'][0]) - 1)
-        #zakomentowalem bo w stft3D y_vector nie jest macierza, jest wektorem i wyrzucalo tu blad
-        # nie lepiej jakbys w stft zwyklym podzielil odpowiednio macierz i wrzucil osobne wektory do x_vector i y_vector ?
+        self.x_cursor_layout.set_maximum(len(self.data['y_vector'][0]) - 1)
         self.y_cursor_layout.set_maximum(len(self.data['y_vector']) - 1)
 
     def add_kwarg_fields(self):
