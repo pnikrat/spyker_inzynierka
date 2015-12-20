@@ -102,4 +102,4 @@ def stft3d(fs, data):
     time, freqs = np.meshgrid(time, freqs, sparse=True)
 
     labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Time [s]', 'zlabel': 'Amplitude [-]'}
-    return {'y_vector': freqs, 'x_vector': time, 'z_vector': spectrum, 'labels': labels}
+    return {'y_vector': spectrum, 'x_vector': time, 'z_vector': freqs, 'labels': labels}

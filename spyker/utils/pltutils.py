@@ -10,7 +10,8 @@ def plot_function(fig, data):
     y_vector = data['y_vector']
     if 'z_vector' in data:
         ax = fig.gca(projection='3d')
-        z_vector = data['z_vector']
+        z_vector = data['y_vector'] # podmiana wektorow (przekazuje spectrum w y_vector aby zgadzalo sie z plt_single)
+        y_vector = data['z_vector']
     else:
         ax = fig.add_subplot(1, 1, 1)
 

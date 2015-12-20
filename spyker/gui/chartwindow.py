@@ -170,7 +170,6 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
 
             self.data = self.data + self.multiplier * file_data
 
-        print self.data
         args = [self.fs, self.data]
         for kwarg_edit in self.kwarg_edits:
             args.append(float(kwarg_edit.text()))
