@@ -13,7 +13,7 @@ from spyker.gui.entrylayout import EntryLayout
 from spyker.gui.filepicker import FilePicker
 from spyker.listeners.filepickerlistener import FilePickerListener
 from spyker.utils.constants import RECS_DIR
-from spyker.utils.pltutils import *
+from spyker.utils.pltutils import plt_single, plot_function, plot_3d
 from spyker.utils.utils import get_kwargs
 
 
@@ -33,7 +33,7 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
     def init_ui(self):
         self.init_layout()
         self.init_plot()
-        self.resize(1000, 600)
+        self.showMaximized()
         self.setWindowTitle('Recording "' + str(self.file_name) + '" : ' + str(self.function_name))
 
     def init_layout(self):
@@ -60,12 +60,12 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
         self.plot_layout = QtGui.QVBoxLayout()
         self.plot_layout.addWidget(self.canvas)
         self.plot_layout.addWidget(self.toolbar)
-        self.layout.addLayout(self.plot_layout, 2)
+        self.layout.addLayout(self.plot_layout, 3)
 
     def init_controls_layout(self):
         self.controls_layout = QtGui.QVBoxLayout()
         self.init_params_layout()
-        self.layout.addLayout(self.controls_layout, 1)
+        self.layout.addLayout(self.controls_layout, 2)
 
     def init_params_layout(self):
         self.params_layout = QtGui.QVBoxLayout()
@@ -134,7 +134,10 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
 
     def replot(self):
         self.plot_data = self.function(*self.get_args())
-        plot_function(self.fig, self.plot_data)
+        if 'z_vector' in self.plot_data:
+            plot_3d(self.fig, self.plot_data)
+        else:
+            plot_function(self.fig, self.plot_data)
 
         if hasattr(self, 'x_cursor_layout'):
             self.update_sliders()

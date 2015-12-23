@@ -1,5 +1,5 @@
 from matplotlib import cm
-
+from mpl_toolkits.mplot3d import Axes3D
 from spyker.model.draggableplots import DraggableLine
 
 
@@ -8,12 +8,8 @@ def plot_function(fig, data):
 
     x_vector = data['x_vector']
     y_vector = data['y_vector']
-    if 'z_vector' in data:
-        ax = fig.gca(projection='3d')
-        z_vector = data['y_vector'] # podmiana wektorow (przekazuje spectrum w y_vector aby zgadzalo sie z plt_single)
-        y_vector = data['z_vector']
-    else:
-        ax = fig.add_subplot(1, 1, 1)
+
+    ax = fig.add_subplot(1, 1, 1)
 
     labels = data['labels']
 
@@ -25,27 +21,14 @@ def plot_function(fig, data):
             ly = ax.axvline(color='r')
             ly.set_xdata(x)
 
-    if 'z_vector' not in data:
-        if len(labels) == 2:
-            ax.plot(x_vector, y_vector)
-            if 'sliders' in data:
-                slider1XPos, slider2XPos, interval = data['sliders']
-                leftline = ax.axvline(x=slider1XPos, color='r', linewidth=4)
-                rightline = ax.axvline(x=slider2XPos, color='r', linewidth=4)
-
-                h = DraggableLine(leftline, rightline, interval)
-                h.connect()
-                return h  # need to return handlers, otherwise they are garbage collected and user cant move sliders
-
-        elif len(labels) == 3:
-            pax = ax.pcolormesh(y_vector)
-            cbar = fig.colorbar(pax)
-            cbar.ax.set_ylabel(labels.get('zlabel'))
-            ax.autoscale(enable=True, axis='both', tight=True)
-    else:
+    if len(labels) == 2:
+        ax.plot(x_vector, y_vector)
+    elif len(labels) == 3:
+        pax = ax.pcolormesh(y_vector)
+        cbar = fig.colorbar(pax)
+        cbar.ax.set_ylabel(labels.get('zlabel'))
         ax.autoscale(enable=True, axis='both', tight=True)
-        surf = ax.plot_surface(y_vector, x_vector, z_vector, rstride=2, cstride=2, cmap=cm.coolwarm, linewidth=0)
-        fig.colorbar(surf)
+    fig.tight_layout()
 
 
 def plt_single(fig, data, nr, xory):
@@ -64,3 +47,46 @@ def plt_single(fig, data, nr, xory):
         ax.set_xlabel(labels.get('xlabel'))
         y_vector = data['y_vector'][nr]
         ax.plot(y_vector)
+
+
+def plot_3d(fig, data):
+    fig.clear()
+
+    x_vector = data['x_vector']
+    ax = fig.gca(projection='3d')
+    z_vector = data['y_vector'] # podmiana wektorow (przekazuje spectrum w y_vector aby zgadzalo sie z plt_single)
+    y_vector = data['z_vector']
+
+    labels = data['labels']
+
+    ax.set_xlabel(labels.get('xlabel'))
+    ax.set_ylabel(labels.get('ylabel'))
+
+    ax.autoscale(enable=True, axis='both', tight=True)
+    surf = ax.plot_surface(y_vector, x_vector, z_vector, rstride=2, cstride=2, cmap=cm.coolwarm, linewidth=0)
+    fig.colorbar(surf)
+    fig.tight_layout()
+
+
+def plot_trimmable(fig, data):
+    fig.clear()
+
+    x_vector = data['x_vector']
+    y_vector = data['y_vector']
+
+    ax = fig.add_subplot(1, 1, 1)
+
+    labels = data['labels']
+
+    ax.set_xlabel(labels.get('xlabel'))
+    ax.set_ylabel(labels.get('ylabel'))
+
+    ax.plot(x_vector, y_vector)
+    slider1XPos, slider2XPos, interval = data['sliders']
+    leftline = ax.axvline(x=slider1XPos, color='r', linewidth=4)
+    rightline = ax.axvline(x=slider2XPos, color='r', linewidth=4)
+
+    h = DraggableLine(leftline, rightline, interval)
+    h.connect()
+    fig.tight_layout()
+    return h  # need to return handlers, otherwise they are garbage collected and user cant move sliders

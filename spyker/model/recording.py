@@ -9,7 +9,7 @@ from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 
 import spyker.model.charts as plots
 from spyker.utils.constants import f_sampling, RECS_DIR
-from spyker.utils.pltutils import plot_function
+from spyker.utils.pltutils import plot_function, plot_trimmable
 
 
 class SoundStream(object):
@@ -87,7 +87,9 @@ class TrimCanvas(QtGui.QWidget):
         self.timedata = data['x_vector']
         if mode == 'm':
             data['sliders'] = (self.timedata[-1]*0.1, self.timedata[-1]*0.1 + self.interval, self.interval)
-        self.handles = plot_function(self.figure, data)
+            self.handles = plot_trimmable(self.figure, data)
+        else:
+            self.handles = plot_function(self.figure, data)
         self.canvas.draw()
 
     def clear_data(self):

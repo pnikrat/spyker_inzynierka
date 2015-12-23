@@ -21,6 +21,8 @@ class FileGrid(QtGui.QGridLayout):
 
         self.list_view = FileListView(self.model)
 
+        file_grid_label = QtGui.QLabel('Nagrania')
+
         add_button = FileButton("+", "#35ae56")
         add_button.clicked.connect(self.start_add_new_window)
 
@@ -30,10 +32,13 @@ class FileGrid(QtGui.QGridLayout):
         play_button = FileButton("", "#35ae56", "icons/play.png")
         play_button.clicked.connect(lambda: self.play_recording())
 
-        self.addWidget(self.list_view, 0, 0, 6, 1)
-        self.addWidget(add_button, 0, 1)
-        self.addWidget(remove_button, 1, 1)
-        self.addWidget(play_button, 2, 1)
+        self.addWidget(file_grid_label, 0, 0, 1, 2)
+        self.addWidget(self.list_view, 1, 0, 30, 1)
+        self.addWidget(add_button, 1, 1)
+        self.addWidget(remove_button, 2, 1)
+        self.addWidget(play_button, 3, 1)
+        self.setRowStretch(0, 0)
+        self.setRowStretch(1, 10)
 
     def start_add_new_window(self):
         self.new_record_window = RecordWindow(self.model)
@@ -59,9 +64,13 @@ class ChartGrid(QtGui.QGridLayout):
         super(ChartGrid, self).__init__()
 
         self.model = model
+        chart_grid_label = QtGui.QLabel('Wykresy')
 
         self.list_view = ChartListView(self.model)
-        self.addWidget(self.list_view, 0, 0, 6, 1)
+        self.addWidget(chart_grid_label, 0, 0, 1, 1)
+        self.addWidget(self.list_view, 1, 0, 6, 1)
+        self.setRowStretch(0, 0)
+        self.setRowStretch(1, 10)
 
 
 class PlotGrid(QtGui.QGridLayout):
@@ -113,7 +122,7 @@ class MainWindow(QtGui.QWidget):
         self.file_list_model = file_list_model
         self.chart_list_model = chart_list_model
 
-        hbox = QtGui.QHBoxLayout(self)
+        hbox = QtGui.QVBoxLayout(self)
 
         file_grid = FileGrid(self.file_list_model)
         file_frame = QtGui.QFrame()
@@ -144,5 +153,5 @@ class MainWindow(QtGui.QWidget):
 
         hbox.addWidget(splitter2)
         self.setLayout(hbox)
-        self.setGeometry(200, 200, 700, 200)
+        self.setGeometry(200, 200, 700, 250)
         self.setWindowTitle('Main window')
