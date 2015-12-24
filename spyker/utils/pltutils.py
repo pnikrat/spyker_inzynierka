@@ -3,8 +3,9 @@ from mpl_toolkits.mplot3d import Axes3D
 from spyker.model.draggableplots import DraggableLine
 
 
-def plot_function(fig, data):
-    fig.clear()
+def plot_function(fig, data, clear=True):
+    if clear:
+        fig.clear()
 
     x_vector = data['x_vector']
     y_vector = data['y_vector']
@@ -22,13 +23,15 @@ def plot_function(fig, data):
             ly.set_xdata(x)
 
     if len(labels) == 2:
-        ax.plot(x_vector, y_vector)
+        ax.plot(x_vector, y_vector, label=data['legend'])
+        ax.legend()
     elif len(labels) == 3:
         pax = ax.pcolormesh(y_vector)
         cbar = fig.colorbar(pax)
         cbar.ax.set_ylabel(labels.get('zlabel'))
         ax.autoscale(enable=True, axis='both', tight=True)
     fig.tight_layout()
+
 
 
 def plt_single(fig, data, nr, xory):

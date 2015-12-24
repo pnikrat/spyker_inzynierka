@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io.wavfile
 import scipy.signal
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
@@ -12,7 +12,7 @@ from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 from spyker.gui.entrylayout import EntryLayout
 from spyker.gui.filepicker import FilePicker
 from spyker.listeners.filepickerlistener import FilePickerListener
-from spyker.utils.constants import RECS_DIR
+from spyker.utils.constants import RECS_DIR, ChartType
 from spyker.utils.pltutils import plt_single, plot_function, plot_3d
 from spyker.utils.utils import get_kwargs
 
@@ -74,9 +74,18 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
         self.kwarg_edits = []
         self.add_kwarg_fields()
 
-        self.button = QtGui.QPushButton('Plot')
+        self.button = QtGui.QPushButton('Plot main recording')
+
+        if self.function_name != ChartType.STFT3D and self.function_name != ChartType.STFT \
+                and self.function_name != ChartType.MFCC:
+            self.combo = QtGui.QComboBox()
+            self.combo.setModel(self.file_list_model)
+            self.combo.activated.connect(self.next_plot)
+            self.params_layout.addWidget(self.combo)
+
         self.button.clicked.connect(self.replot)
         self.params_layout.addWidget(self.button)
+
         self.controls_layout.addLayout(self.params_layout)
 
     def init_cursors_layout(self):
@@ -137,11 +146,21 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
         if 'z_vector' in self.plot_data:
             plot_3d(self.fig, self.plot_data)
         else:
+            self.plot_data['legend'] = self.file_name
             plot_function(self.fig, self.plot_data)
 
         if hasattr(self, 'x_cursor_layout'):
             self.update_sliders()
 
+        self.canvas.draw()
+
+    def next_plot(self):
+        index = self.combo.currentIndex()
+        which_recording = self.file_list_model.file_paths[index]
+        fs, data = scipy.io.wavfile.read(RECS_DIR + "/" + which_recording)
+        plot_data = self.function(fs, data)
+        plot_data['legend'] = which_recording
+        plot_function(self.fig, plot_data, clear=False)
         self.canvas.draw()
 
     def update_sliders(self):

@@ -13,7 +13,7 @@ class EntryLayout(QtGui.QGridLayout):
 
         self.slider = QtGui.QSlider(QtCore.Qt.Horizontal)
         self.spinbox = QtGui.QSpinBox()
-        self.button = QtGui.QPushButton('plot')
+        self.button = QtGui.QPushButton('Plot ' + str(label_name) + ' cut')
 
         edit_layout = QtGui.QHBoxLayout()
         edit_layout.addWidget(self.slider)
