@@ -162,7 +162,7 @@ class ChartWindow(QtGui.QMainWindow):
     def get_kwargs(self):
         kwargs = []
         for kwarg_edit in self.kwarg_edits:
-            kwargs.append(float(kwarg_edit.text()))
+            kwargs.append(float(kwarg_edit.value()))
         return kwargs
 
     def plot_next(self, index):
@@ -176,7 +176,6 @@ class ChartWindow(QtGui.QMainWindow):
     def plot_difference(self, index):
         recording_to_subtract = self.file_list_model.file_paths[index]
         file_to_subtract_fs, file_to_subtract_data = scipy.io.wavfile.read(RECS_DIR + '/' + recording_to_subtract)
-
 
         if self.data.shape != file_to_subtract_data.shape:
             self.incorrect_data_label.setVisible(True)
@@ -214,22 +213,14 @@ class ChartWindow(QtGui.QMainWindow):
             for k, v in get_kwargs(self.function).iteritems():
                 h_box_layout = QtGui.QHBoxLayout()
                 label = QtGui.QLabel(k)
-                label.setMinimumWidth(50)
                 h_box_layout.addWidget(label)
 
-                kwarg_edit = QtGui.QLineEdit(str(v))
+                kwarg_edit = QtGui.QDoubleSpinBox()
+                kwarg_edit.setValue(v)
                 h_box_layout.addWidget(kwarg_edit)
                 self.kwarg_edits.append(kwarg_edit)
 
                 self.params_layout.addLayout(h_box_layout)
-
-                # def pick_file(self, multiplier):
-                #     self.pick_file_dialog = FilePicker(self.file_list_model, self)
-                #     self.pick_file_dialog.show()
-                #     self.multiplier = multiplier
-                #
-                # def file_picked(self, picked_file):
-                #     self.additional_file = picked_file
 
 
 def is_two_d(function_name):
