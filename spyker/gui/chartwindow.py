@@ -5,24 +5,22 @@ import scipy.io.wavfile
 import scipy.signal
 from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
+from PyQt4.QtGui import QHBoxLayout
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 
 from spyker.gui.entrylayout import EntryLayout
-from spyker.gui.filepicker import FilePicker
-from spyker.listeners.filepickerlistener import FilePickerListener
 from spyker.utils.constants import RECS_DIR, ChartType
 from spyker.utils.pltutils import plt_single, plot_function, plot_3d
 from spyker.utils.utils import get_kwargs
 
 
-class ChartWindow(QtGui.QMainWindow, FilePickerListener):
+class ChartWindow(QtGui.QMainWindow):
     def __init__(self, function, file_name, function_name, file_list_model, parent=None):
         super(ChartWindow, self).__init__(parent)
         self.function = function
         self.function_name = function_name
         self.file_name = file_name
-        self.additional_file = None
         self.file_list_model = file_list_model
         self.fs, self.data = scipy.io.wavfile.read(RECS_DIR + '/' + self.file_name)
 
@@ -39,7 +37,7 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
         self.layout = QtGui.QHBoxLayout()
         self.init_plot_layout()
         self.init_controls_layout()
-        self.init_menu()
+        # self.init_menu()
 
         window = QtGui.QWidget()
         window.setLayout(self.layout)
@@ -74,16 +72,19 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
         self.add_kwarg_fields()
 
         self.button = QtGui.QPushButton('Plot main recording')
-
-        if self.function_name != ChartType.STFT3D and self.function_name != ChartType.STFT \
-                and self.function_name != ChartType.MFCC:
-            self.combo = QtGui.QComboBox()
-            self.combo.setModel(self.file_list_model)
-            self.combo.activated.connect(self.next_plot)
-            self.params_layout.addWidget(self.combo)
-
-        self.button.clicked.connect(self.replot)
+        self.button.clicked.connect(lambda: self.replot(self.function(*self.get_args())))
         self.params_layout.addWidget(self.button)
+
+        if is_two_d(self.function_name):
+            plot_next_layout = ComboLayout("Plot next: ", self.file_list_model, self.plot_next)
+            self.params_layout.addLayout(plot_next_layout)
+
+        plot_difference_layout = ComboLayout("Plot difference: ", self.file_list_model, self.plot_difference)
+        self.params_layout.addLayout(plot_difference_layout)
+
+        self.incorrect_data_label = QtGui.QLabel("<font color=\"red\">* " + "files must have same length" + "</font>")
+        self.incorrect_data_label.setVisible(False)
+        self.params_layout.addWidget(self.incorrect_data_label)
 
         self.controls_layout.addLayout(self.params_layout)
 
@@ -101,11 +102,11 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
 
     def init_cursors(self):
         self.x_cursor_layout.button.clicked.connect(
-                lambda: plt_single(self.fig, self.plot_data, self.x_cursor_layout.slider.value(), 'x'))
+                lambda: plt_single(self.fig, self.plotted_data, self.x_cursor_layout.slider.value(), 'x'))
         self.x_cursor_layout.button.clicked.connect(self.canvas.draw)
 
         self.y_cursor_layout.button.clicked.connect(
-                lambda: plt_single(self.fig, self.plot_data, self.y_cursor_layout.slider.value(), 'y'))
+                lambda: plt_single(self.fig, self.plotted_data, self.y_cursor_layout.slider.value(), 'y'))
         self.y_cursor_layout.button.clicked.connect(self.canvas.draw)
 
     def init_menu(self):
@@ -134,37 +135,79 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
         fileMenu.addAction(exitAction)
 
     def init_plot(self):
-        self.replot()
-        if len(self.plot_data['labels']) == 3:
+
+        self.replot(self.function(*self.get_args()))
+        if not is_two_d(self.function_name):
             self.init_cursors_layout()
             self.init_cursors()
-            self.update_sliders()
+            self.plot_sliders()
 
-    def replot(self):
-        self.plot_data = self.function(*self.get_args())
-        if 'z_vector' in self.plot_data:
-            plot_3d(self.fig, self.plot_data)
+    def replot(self, data_to_plot):
+        if 'z_vector' in data_to_plot:
+            plot_3d(self.fig, data_to_plot)
         else:
-            self.plot_data['legend'] = self.file_name
-            plot_function(self.fig, self.plot_data)
+            data_to_plot['legend'] = self.file_name
+            plot_function(self.fig, data_to_plot)
 
         if hasattr(self, 'x_cursor_layout'):
-            self.update_sliders()
+            self.plot_sliders()
 
         self.canvas.draw()
+        self.plotted_data = data_to_plot
 
-    def next_plot(self):
-        index = self.combo.currentIndex()
-        which_recording = self.file_list_model.file_paths[index]
-        fs, data = scipy.io.wavfile.read(RECS_DIR + "/" + which_recording)
+    def get_args(self):
+        args = [self.fs, self.data] + self.get_kwargs()
+        return args
+
+    def get_kwargs(self):
+        kwargs = []
+        for kwarg_edit in self.kwarg_edits:
+            kwargs.append(float(kwarg_edit.text()))
+        return kwargs
+
+    def plot_next(self, index):
+        additional_recording = self.file_list_model.file_paths[index]
+        fs, data = scipy.io.wavfile.read(RECS_DIR + "/" + additional_recording)
         plot_data = self.function(fs, data)
-        plot_data['legend'] = which_recording
+        plot_data['legend'] = additional_recording
         plot_function(self.fig, plot_data, clear=False)
         self.canvas.draw()
 
-    def update_sliders(self):
-        self.x_cursor_layout.set_maximum(len(self.plot_data['y_vector'][0]) - 1)
-        self.y_cursor_layout.set_maximum(len(self.plot_data['y_vector']) - 1)
+    def plot_difference(self, index):
+        recording_to_subtract = self.file_list_model.file_paths[index]
+        file_to_subtract_fs, file_to_subtract_data = scipy.io.wavfile.read(RECS_DIR + '/' + recording_to_subtract)
+
+
+        if self.data.shape != file_to_subtract_data.shape:
+            self.incorrect_data_label.setVisible(True)
+            return
+        else:
+            self.incorrect_data_label.setVisible(False)
+
+        # if data.shape > file_to_subtract_data.shape:
+        #     file_to_subtract_data.resize(data.shape)
+        # elif data.shape < file_to_subtract_data.shape:
+        #     data.resize(file_to_subtract_data.shape)
+
+
+        args = [self.fs, self.data] + self.get_kwargs()
+        data_to_plot = self.function(*args)
+        minuend_y_vector = data_to_plot['y_vector']
+
+        subtrahend_args = [file_to_subtract_fs, file_to_subtract_data] + self.get_kwargs()
+        subtrahend_y_vector = self.function(*subtrahend_args)['y_vector']
+
+        y_vector_to_plot = minuend_y_vector - subtrahend_y_vector
+
+        print minuend_y_vector
+        print subtrahend_y_vector
+        print y_vector_to_plot
+        data_to_plot['y_vector'] = y_vector_to_plot
+        self.replot(data_to_plot)
+
+    def plot_sliders(self):
+        self.x_cursor_layout.set_maximum(len(self.plotted_data['y_vector'][0]) - 1)
+        self.y_cursor_layout.set_maximum(len(self.plotted_data['y_vector']) - 1)
 
     def add_kwarg_fields(self):
         if inspect.getargspec(self.function).defaults is not None:
@@ -180,26 +223,32 @@ class ChartWindow(QtGui.QMainWindow, FilePickerListener):
 
                 self.params_layout.addLayout(h_box_layout)
 
-    def get_args(self):
-        if self.additional_file is not None:
-            fs, file_data = scipy.io.wavfile.read(RECS_DIR + '/' + self.additional_file)
+                # def pick_file(self, multiplier):
+                #     self.pick_file_dialog = FilePicker(self.file_list_model, self)
+                #     self.pick_file_dialog.show()
+                #     self.multiplier = multiplier
+                #
+                # def file_picked(self, picked_file):
+                #     self.additional_file = picked_file
 
-            if self.data.shape > file_data.shape:
-                file_data.resize(self.data.shape)
-            elif self.data.shape < file_data.shape:
-                self.data.resize(file_data.shape)
 
-            self.data = self.data + self.multiplier * file_data
+def is_two_d(function_name):
+    return function_name != ChartType.STFT3D and function_name != ChartType.STFT \
+           and function_name != ChartType.MFCC
 
-        args = [self.fs, self.data]
-        for kwarg_edit in self.kwarg_edits:
-            args.append(float(kwarg_edit.text()))
-        return args
 
-    def pick_file(self, multiplier):
-        self.pick_file_dialog = FilePicker(self.file_list_model, self)
-        self.pick_file_dialog.show()
-        self.multiplier = multiplier
+class ComboLayout(QtGui.QHBoxLayout):
+    def __init__(self, name, model, fun_to_call):
+        QHBoxLayout.__init__(self)
 
-    def file_picked(self, picked_file):
-        self.additional_file = picked_file
+        label = QtGui.QLabel(name)
+
+        combo = QtGui.QComboBox()
+        combo.setModel(model)
+
+        button = QtGui.QPushButton("Plot")
+        button.clicked.connect(lambda: fun_to_call(combo.currentIndex()))
+
+        self.addWidget(label)
+        self.addWidget(combo)
+        self.addWidget(button)
