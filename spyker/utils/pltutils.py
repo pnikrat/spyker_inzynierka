@@ -1,4 +1,5 @@
 from matplotlib import cm
+# noinspection PyUnresolvedReferences
 from mpl_toolkits.mplot3d import Axes3D
 from spyker.model.draggableplots import DraggableLine
 
@@ -30,7 +31,7 @@ def plot_function(fig, data, clear=True):
         cbar = fig.colorbar(pax)
         cbar.ax.set_ylabel(labels.get('zlabel'))
         ax.autoscale(enable=True, axis='both', tight=True)
-    fig.tight_layout()
+    fig.savefig('samplefigure', bbox_inches='tight')
 
 
 
@@ -50,6 +51,7 @@ def plt_single(fig, data, nr, xory):
         ax.set_xlabel(labels.get('xlabel'))
         y_vector = data['y_vector'][nr]
         ax.plot(y_vector)
+    fig.savefig('samplefigure', bbox_inches='tight')
 
 
 def plot_3d(fig, data):
@@ -68,7 +70,7 @@ def plot_3d(fig, data):
     ax.autoscale(enable=True, axis='both', tight=True)
     surf = ax.plot_surface(y_vector, x_vector, z_vector, rstride=2, cstride=2, cmap=cm.coolwarm, linewidth=0)
     fig.colorbar(surf)
-    fig.tight_layout()
+    fig.savefig('samplefigure', bbox_inches='tight')
 
 
 def plot_trimmable(fig, data):

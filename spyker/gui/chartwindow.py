@@ -1,10 +1,9 @@
 import inspect
 
-import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io.wavfile
 import scipy.signal
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
