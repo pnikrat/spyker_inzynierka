@@ -22,6 +22,7 @@ def stft(fs, data, frame_size=0.01, hop=0.05):
 
 
 def mfccoefs(fs, data, nwin=256, nfft=512, nceps=13):
+    print fs, data, nwin, nfft, nceps
     ceps, mspec, spec = mfcc(data, nwin, nfft, fs, nceps)
     labels = {'xlabel': 'Coefficient number', 'ylabel': 'Frame number', 'zlabel': ''}
     return {'y_vector': ceps, 'x_vector': None, 'labels': labels}

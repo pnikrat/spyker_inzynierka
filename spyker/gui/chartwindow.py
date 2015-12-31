@@ -162,7 +162,7 @@ class ChartWindow(QtGui.QMainWindow):
     def get_kwargs(self):
         kwargs = []
         for kwarg_edit in self.kwarg_edits:
-            kwargs.append(float(kwarg_edit.value()))
+            kwargs.append(float(kwarg_edit.text()))
         return kwargs
 
     def plot_next(self, index):
@@ -211,16 +211,17 @@ class ChartWindow(QtGui.QMainWindow):
     def add_kwarg_fields(self):
         if inspect.getargspec(self.function).defaults is not None:
             for k, v in get_kwargs(self.function).iteritems():
-                h_box_layout = QtGui.QHBoxLayout()
-                label = QtGui.QLabel(k)
-                h_box_layout.addWidget(label)
+                edit_layout = QtGui.QGridLayout()
 
-                kwarg_edit = QtGui.QDoubleSpinBox()
-                kwarg_edit.setValue(v)
-                h_box_layout.addWidget(kwarg_edit)
+                edit_layout.setColumnStretch(0,1)
+                edit_layout.setColumnStretch(1,2)
+                label = QtGui.QLabel(k)
+                kwarg_edit = QtGui.QLineEdit(str(v))
+                edit_layout.addWidget(label, 0, 0)
+                edit_layout.addWidget(kwarg_edit, 0, 1)
                 self.kwarg_edits.append(kwarg_edit)
 
-                self.params_layout.addLayout(h_box_layout)
+                self.params_layout.addLayout(edit_layout)
 
 
 def is_two_d(function_name):
