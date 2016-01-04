@@ -167,9 +167,6 @@ class ChartWindow(QtGui.QMainWindow):
 
         y_vector_to_plot = minuend_y_vector - subtrahend_y_vector
 
-        print minuend_y_vector
-        print subtrahend_y_vector
-        print y_vector_to_plot
         data_to_plot['y_vector'] = y_vector_to_plot
         self.replot(data_to_plot)
         self.replot(data_to_plot)

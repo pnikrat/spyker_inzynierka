@@ -11,18 +11,37 @@ from scikits.talkbox.features import mfcc
 from scipy.signal import lfilter, hamming
 
 
+def get_freqs_ticks(fs, data_length, ans_length):
+    time = np.linspace(0, float(data_length) / fs, data_length)
+    freq = np.fft.rfftfreq(time.shape[-1], 1.0 / fs)
+    locs = np.arange(0, ans_length, ans_length / 10)
+
+    max_freq = int(freq[-1])
+    labels = np.arange(0, max_freq, int(max_freq / 10))
+    ticks = {'locs': locs, 'labels': labels}
+    return ticks
+
+
+def get_time_ticks(fs, data_length, ans_length):
+    locs = np.arange(0, ans_length, ans_length / 10)
+    max_time = float(data_length / fs)
+    print locs, data_length, fs, max_time
+    labels = np.arange(0, max_time+1, max_time / 10)
+    ticks = {'locs': locs, 'labels': labels}
+    return ticks
+
+
 def stft(fs, data, frame_size=0.05, hop=0.025):
     frame_samp = int(frame_size * fs)
     hop_samp = int(hop * fs)
     w = scipy.hanning(frame_samp)
+    ans = scipy.array([np.fft.rfft(w * data[i:i + frame_samp])
+                       for i in range(0, len(data) - frame_samp, hop_samp)])
+    ans = scipy.log10(scipy.absolute(ans.T))
+    labels = {'xlabel': 'Time [s]', 'ylabel': 'Frequency [Hz]', 'zlabel': 'Amplitude'}
 
-    for i in range(0, len(data) - frame_samp, hop_samp):
-        print i
-
-    data = scipy.array([np.fft.rfft(w * data[i:i + frame_samp])
-                        for i in range(0, len(data) - frame_samp, hop_samp)])
-    labels = {'xlabel': 'Time frames [-]', 'ylabel': 'Frequency [Hz]', 'zlabel': 'Amplitude'}
-    return {'y_vector': scipy.log10(scipy.absolute(data.T)), 'x_vector': None, 'labels': labels}
+    return {'y_vector': ans, 'x_vector': None, 'labels': labels, 'yticks': get_freqs_ticks(fs, len(data), len(ans)),
+            'xticks': get_time_ticks(fs, len(data), len(ans.T))}
 
 
 def fft2(fs, data, frame_size=0.05, hop=0.025):
@@ -30,16 +49,16 @@ def fft2(fs, data, frame_size=0.05, hop=0.025):
     hop_samp = int(hop * fs)
     w = scipy.hanning(frame_samp)
 
-    data = scipy.array([np.fft.rfft(w * data[i:i + frame_samp])
-                        for i in range(0, len(data) - frame_samp, hop_samp)])
-    data = scipy.absolute(data.T)
-    ans = [sum(i) / len(i) for i in data]
+    ans = scipy.array([np.fft.rfft(w * data[i:i + frame_samp])
+                       for i in range(0, len(data) - frame_samp, hop_samp)])
+    ans = scipy.absolute(ans.T)
+    ans = [sum(i) / len(i) for i in ans]
     labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Amplitude [-]'}
-    return {'y_vector': ans, 'x_vector': range(0, len(ans)), 'labels': labels}
+    return {'y_vector': ans, 'x_vector': range(0, len(ans)), 'labels': labels,
+            'xticks': get_freqs_ticks(fs, len(data), len(ans))}
 
 
 def mfccoefs(fs, data, nwin=256, nfft=512, nceps=13):
-    print fs, data, nwin, nfft, nceps
     ceps, mspec, spec = mfcc(data, nwin, nfft, fs, nceps)
     labels = {'xlabel': 'Coefficient number', 'ylabel': 'Frame number', 'zlabel': ''}
     return {'y_vector': ceps, 'x_vector': None, 'labels': labels}
