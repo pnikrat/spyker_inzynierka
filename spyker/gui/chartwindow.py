@@ -37,7 +37,7 @@ class ChartWindow(QtGui.QMainWindow):
         self.layout = QtGui.QHBoxLayout()
         self.init_plot_layout()
         self.init_controls_layout()
-        # self.init_menu()
+
 
         window = QtGui.QWidget()
         window.setLayout(self.layout)
@@ -109,31 +109,6 @@ class ChartWindow(QtGui.QMainWindow):
                 lambda: plt_single(self.fig, self.plotted_data, self.y_cursor_layout.slider.value(), 'y'))
         self.y_cursor_layout.button.clicked.connect(self.canvas.draw)
 
-    def init_menu(self):
-
-        addAction = QtGui.QAction('&Add', self)
-        addAction.setShortcut('Ctrl+A')
-        addAction.setStatusTip('Add signal')
-        addAction.triggered.connect(lambda: self.pick_file(1))
-
-        subtractAction = QtGui.QAction('&Subtract', self)
-        subtractAction.setShortcut('Ctrl+S')
-        subtractAction.setStatusTip('Subtract signal')
-        subtractAction.triggered.connect(lambda: self.pick_file(-1))
-
-        exitAction = QtGui.QAction('&Exit', self)
-        exitAction.setShortcut('Ctrl+Q')
-        exitAction.setStatusTip('Exit application')
-        exitAction.triggered.connect(self.close)
-
-        self.statusBar()
-
-        menubar = self.menuBar()
-        fileMenu = menubar.addMenu('&File')
-        fileMenu.addAction(addAction)
-        fileMenu.addAction(subtractAction)
-        fileMenu.addAction(exitAction)
-
     def init_plot(self):
 
         self.replot(self.function(*self.get_args()))
@@ -183,12 +158,6 @@ class ChartWindow(QtGui.QMainWindow):
         else:
             self.incorrect_data_label.setVisible(False)
 
-        # if data.shape > file_to_subtract_data.shape:
-        #     file_to_subtract_data.resize(data.shape)
-        # elif data.shape < file_to_subtract_data.shape:
-        #     data.resize(file_to_subtract_data.shape)
-
-
         args = [self.fs, self.data] + self.get_kwargs()
         data_to_plot = self.function(*args)
         minuend_y_vector = data_to_plot['y_vector']
@@ -202,6 +171,7 @@ class ChartWindow(QtGui.QMainWindow):
         print subtrahend_y_vector
         print y_vector_to_plot
         data_to_plot['y_vector'] = y_vector_to_plot
+        self.replot(data_to_plot)
         self.replot(data_to_plot)
 
     def plot_sliders(self):

@@ -7,6 +7,7 @@ class ChartType:
     MFCC = 'mfcc'
     STFT = 'stft'
     FFT = 'fft'
+    FFT2 = 'fft2'
     STFT3D = 'stft3d'
     ENVELOPE = 'envelope'
     FORMANTS = 'formants'

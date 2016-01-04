@@ -11,14 +11,31 @@ from scikits.talkbox.features import mfcc
 from scipy.signal import lfilter, hamming
 
 
-def stft(fs, data, frame_size=0.01, hop=0.05):
+def stft(fs, data, frame_size=0.05, hop=0.025):
     frame_samp = int(frame_size * fs)
     hop_samp = int(hop * fs)
     w = scipy.hanning(frame_samp)
-    data = scipy.array(
-            [np.fft.rfft(w * data[i:i + frame_samp]) for i in range(0, len(data) - frame_samp, hop_samp)])
+
+    for i in range(0, len(data) - frame_samp, hop_samp):
+        print i
+
+    data = scipy.array([np.fft.rfft(w * data[i:i + frame_samp])
+                        for i in range(0, len(data) - frame_samp, hop_samp)])
     labels = {'xlabel': 'Time frames [-]', 'ylabel': 'Frequency [Hz]', 'zlabel': 'Amplitude'}
     return {'y_vector': scipy.log10(scipy.absolute(data.T)), 'x_vector': None, 'labels': labels}
+
+
+def fft2(fs, data, frame_size=0.05, hop=0.025):
+    frame_samp = int(frame_size * fs)
+    hop_samp = int(hop * fs)
+    w = scipy.hanning(frame_samp)
+
+    data = scipy.array([np.fft.rfft(w * data[i:i + frame_samp])
+                        for i in range(0, len(data) - frame_samp, hop_samp)])
+    data = scipy.absolute(data.T)
+    ans = [sum(i) / len(i) for i in data]
+    labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Amplitude [-]'}
+    return {'y_vector': ans, 'x_vector': range(0, len(ans)), 'labels': labels}
 
 
 def mfccoefs(fs, data, nwin=256, nfft=512, nceps=13):
@@ -50,8 +67,8 @@ def fft(fs, data):
     compledata_array = np.fft.rfft(data)
     module = ((compledata_array.real ** 2 + compledata_array.imag ** 2) ** 0.5) / len(data)
     freq = np.fft.rfftfreq(time.shape[-1], 1.0 / fs)
-    #module = module[:(len(module) / 2)]
-    #freq = freq[:(len(freq) / 2)]
+    # module = module[:(len(module) / 2)]
+    # freq = freq[:(len(freq) / 2)]
     labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Amplitude [-]'}
     return {'y_vector': module[:6000], 'x_vector': freq[:6000], 'labels': labels}
 
@@ -68,7 +85,9 @@ def formant_freqs_on_fft(fs, data):
     return dict(fft(fs, data).items() + {'cursors': formant_freqs(fs, data)}.items())
 
 
- #na usrednionym widmie gestosci mocy
+    # na usrednionym widmie gestosci mocy
+
+
 def formant_freqs(fs, data):
     N = len(data)
     w = numpy.hamming(N)
