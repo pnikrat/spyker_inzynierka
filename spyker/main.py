@@ -13,6 +13,7 @@ if __name__ == '__main__':
     chart_dict = OrderedDict({ChartType.RAW: plots.raw,
                               ChartType.ENVELOPE: plots.envelope,
                               ChartType.FFT: plots.fft,
+                              ChartType.FFT2: plots.fft2,
                               ChartType.MFCC: plots.mfccoefs,
                               ChartType.STFT: plots.stft,
                               ChartType.FORMANTS: plots.formant_freqs_on_fft,

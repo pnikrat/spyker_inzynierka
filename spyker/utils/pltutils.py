@@ -1,6 +1,9 @@
 from matplotlib import cm
+# noinspection PyUnresolvedReferences
 from mpl_toolkits.mplot3d import Axes3D
 from spyker.model.draggableplots import DraggableLine
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 def plot_function(fig, data, clear=True):
@@ -14,8 +17,8 @@ def plot_function(fig, data, clear=True):
 
     labels = data['labels']
 
-    ax.set_xlabel(labels.get('xlabel'))
-    ax.set_ylabel(labels.get('ylabel'))
+    ax.set_xlabel(labels['xlabel'])
+    ax.set_ylabel(labels['ylabel'])
 
     if 'cursors' in data:
         for x in data['cursors']:
@@ -28,10 +31,22 @@ def plot_function(fig, data, clear=True):
     elif len(labels) == 3:
         pax = ax.pcolormesh(y_vector)
         cbar = fig.colorbar(pax)
-        cbar.ax.set_ylabel(labels.get('zlabel'))
+        cbar.ax.set_ylabel(labels['zlabel'])
         ax.autoscale(enable=True, axis='both', tight=True)
-    fig.tight_layout()
+        
+    if 'yticks' in data:
+        yticks = data['yticks']
+        ylocs = yticks['locs']
+        ylabels = yticks['labels']
+        plt.yticks(ylocs, ylabels)
 
+    if 'xticks' in data:
+        xticks = data['xticks']
+        xlocs = xticks['locs']
+        xlabels = xticks['labels']
+        plt.xticks(xlocs, xlabels, rotation='vertical')
+
+    fig.savefig('samplefigure', bbox_inches='tight')
 
 
 def plt_single(fig, data, nr, xory):
@@ -50,6 +65,7 @@ def plt_single(fig, data, nr, xory):
         ax.set_xlabel(labels.get('xlabel'))
         y_vector = data['y_vector'][nr]
         ax.plot(y_vector)
+    fig.savefig('samplefigure', bbox_inches='tight')
 
 
 def plot_3d(fig, data):
@@ -57,7 +73,7 @@ def plot_3d(fig, data):
 
     x_vector = data['x_vector']
     ax = fig.gca(projection='3d')
-    z_vector = data['y_vector'] # podmiana wektorow (przekazuje spectrum w y_vector aby zgadzalo sie z plt_single)
+    z_vector = data['y_vector']  # podmiana wektorow (przekazuje spectrum w y_vector aby zgadzalo sie z plt_single)
     y_vector = data['z_vector']
 
     labels = data['labels']
@@ -68,7 +84,7 @@ def plot_3d(fig, data):
     ax.autoscale(enable=True, axis='both', tight=True)
     surf = ax.plot_surface(y_vector, x_vector, z_vector, rstride=2, cstride=2, cmap=cm.coolwarm, linewidth=0)
     fig.colorbar(surf)
-    fig.tight_layout()
+    fig.savefig('samplefigure', bbox_inches='tight')
 
 
 def plot_trimmable(fig, data):

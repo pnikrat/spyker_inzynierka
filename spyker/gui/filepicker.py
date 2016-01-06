@@ -32,5 +32,6 @@ class FilePicker(QtGui.QDialog):
         self.vBoxLayout.addLayout(buttons_layout)
 
     def on_ok_button(self):
-        self.file_picker_listener.file_picked(self.model.data(self.file_list_view.currentIndex(), QtCore.Qt.DisplayRole))
+        picked_file = self.model.data(self.file_list_view.currentIndex(), QtCore.Qt.DisplayRole)
+        self.file_picker_listener.file_picked(picked_file)
         self.close()
