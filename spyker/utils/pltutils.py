@@ -46,6 +46,7 @@ def plot_function(fig, data, clear=True):
         xlabels = xticks['labels']
         plt.xticks(xlocs, xlabels, rotation='vertical')
 
+    fig.tight_layout()
     fig.savefig('samplefigure', bbox_inches='tight')
 
 
@@ -65,6 +66,7 @@ def plt_single(fig, data, nr, xory):
         ax.set_xlabel(labels.get('xlabel'))
         y_vector = data['y_vector'][nr]
         ax.plot(y_vector)
+    fig.tight_layout()
     fig.savefig('samplefigure', bbox_inches='tight')
 
 
@@ -84,6 +86,7 @@ def plot_3d(fig, data):
     ax.autoscale(enable=True, axis='both', tight=True)
     surf = ax.plot_surface(y_vector, x_vector, z_vector, rstride=2, cstride=2, cmap=cm.coolwarm, linewidth=0)
     fig.colorbar(surf)
+    fig.tight_layout()
     fig.savefig('samplefigure', bbox_inches='tight')
 
 
@@ -102,8 +105,8 @@ def plot_trimmable(fig, data):
 
     ax.plot(x_vector, y_vector)
     slider1XPos, slider2XPos, interval = data['sliders']
-    leftline = ax.axvline(x=slider1XPos, color='r', linewidth=4)
-    rightline = ax.axvline(x=slider2XPos, color='r', linewidth=4)
+    leftline = ax.axvline(x=slider1XPos, color='r', linewidth=1)
+    rightline = ax.axvline(x=slider2XPos, color='r', linewidth=1)
 
     h = DraggableLine(leftline, rightline, interval)
     h.connect()

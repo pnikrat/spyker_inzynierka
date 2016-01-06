@@ -28,16 +28,19 @@ class RecordWindow(QtGui.QDialog):
 
         self.record_name_label = QtGui.QLabel('Name')
         self.record_name_edit = QtGui.QLineEdit()
+        self.record_name_edit.setToolTip("Put recording name here")
 
         self.record_duration_label = QtGui.QLabel('Recording length')
-        #self.record_duration_edit = QtGui.QLineEdit()
         self.record_duration_spin = QtGui.QSpinBox()
+        self.record_duration_spin.setToolTip("Set recording time")
         self.record_duration_spin.setValue(2)
         self.record_duration_spin.setRange(2, 4)
         self.record_duration_spin.valueChanged.connect(lambda: self.rec_spin())
 
         self.interval_label = QtGui.QLabel('Trim interval length')
         self.interval_spin = QtGui.QSpinBox()
+        self.interval_spin.setToolTip("This option determines the width between 2 cursors in manual trim mode."
+                                      " It always has a lower value than Recording length")
         self.interval_spin.setValue(1)
         self.interval_spin.setRange(1, 1)
         self.interval_spin.valueChanged.connect(lambda : self.int_spin())
@@ -56,15 +59,20 @@ class RecordWindow(QtGui.QDialog):
 
         self.cancel_button = QtGui.QPushButton('Cancel all data')
         self.cancel_button.clicked.connect(lambda : self.cancel_recording())
+        self.cancel_button.setToolTip("Cancels current recorded data. Enables mode radiobuttons")
 
         self.apply_button = QtGui.QPushButton('Apply and save recording')
         self.apply_button.clicked.connect(lambda : self.save_new_record())
+        self.apply_button.setDefault(True)
 
         self.trim_options_group = QtGui.QButtonGroup(self)
         self.trim_none = QtGui.QRadioButton("None")
+        self.trim_none.setToolTip("Recording will not be trimmed")
         self.trim_none.setChecked(True) #default option is no trim at all
         self.trim_auto = QtGui.QRadioButton("Auto")
+        self.trim_auto.setToolTip("Application will try to trim automatically")
         self.trim_manual = QtGui.QRadioButton("Manual")
+        self.trim_manual.setToolTip("Trim the recording by yourself")
         self.trim_options_group.addButton(self.trim_none)
         self.trim_options_group.addButton(self.trim_auto)
         self.trim_options_group.addButton(self.trim_manual)
