@@ -89,6 +89,7 @@ class TrimCanvas(QtGui.QWidget):
             data['sliders'] = (self.timedata[-1]*0.1, self.timedata[-1]*0.1 + self.interval, self.interval)
             self.handles = plot_trimmable(self.figure, data)
         else:
+            data['legend'] = None
             self.handles = plot_function(self.figure, data)
         self.canvas.draw()
 
@@ -106,10 +107,12 @@ class TrimCanvas(QtGui.QWidget):
 def autotrimalgo(data_to_trim):
     datacopy = np.copy(data_to_trim)
     datacopy = datacopy / 32768.0
+    mean = np.mean(datacopy)
+    std = np.std(datacopy)
     indexlist = []
     indexback, indexfront, index = (0, 0, 0)
     for x in datacopy:
-        if x < 0.05: #change to noise amplitude ?? how to find it out ?
+        if abs(x) < mean+0.5*std:
             indexlist.append(index)
         index += 1
     for i in range(0, len(indexlist)):

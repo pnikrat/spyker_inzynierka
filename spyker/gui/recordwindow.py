@@ -158,28 +158,25 @@ class RecordWindow(QtGui.QDialog):
 
     def record(self):
         if self.is_data_valid():
-            if self.record_name_edit.text() not in self.model.file_paths:
-                self.disabling_elements(self.trim_radio_buttons, True)
+            self.disabling_elements(self.trim_radio_buttons, True)
 
-                self.message_user("Recording!") #NOT WORKING!
-                self.record_duration = int(self.record_duration_spin.value())
-                self.record_name = self.record_name_edit.text()
+            self.message_user("Recording!") #NOT WORKING!
+            self.record_duration = int(self.record_duration_spin.value())
 
-                self.stream = SoundStream(1024, pyaudio.paInt16, 1, f_sampling)
-                self.stream.open_stream("in")
-                self.stream.record(self.record_duration)
-                frames = self.stream.get_frames()
-                self.before.frames = frames
-                self.stream.close_stream()
 
-                self.before.data = np.fromstring(b''.join(self.before.frames), dtype=np.int16)
-                self.message_user('Recording finished!')
-                self.before.interval = self.interval_spin.value()
-                self.before.replot(self.trim)
-                if self.trim == 'a':
-                    self.autotrim()
-            else:
-                self.message_user('Recording ' + self.record_name_edit.text() + ' already exists!')
+            self.stream = SoundStream(1024, pyaudio.paInt16, 1, f_sampling)
+            self.stream.open_stream("in")
+            self.stream.record(self.record_duration)
+            frames = self.stream.get_frames()
+            self.before.frames = frames
+            self.stream.close_stream()
+
+            self.before.data = np.fromstring(b''.join(self.before.frames), dtype=np.int16)
+            self.message_user('Recording finished!')
+            self.before.interval = self.interval_spin.value()
+            self.before.replot(self.trim)
+            if self.trim == 'a':
+                self.autotrim()
 
     def autotrim(self):
         self.after.data = autotrimalgo(np.copy(self.before.data))
@@ -227,20 +224,24 @@ class RecordWindow(QtGui.QDialog):
             self.message_user('Trim successful')
 
     def save_new_record(self):
-        if self.trim == 'n':
-            if self.before.data is not None:
-                scipy.io.wavfile.write(RECS_DIR + "/" + self.record_name, f_sampling, self.before.data)
+        if self.record_name_edit.text() not in self.model.file_paths:
+            self.record_name = self.record_name_edit.text()
+            if self.trim == 'n':
+                if self.before.data is not None:
+                    scipy.io.wavfile.write(RECS_DIR + "/" + self.record_name, f_sampling, self.before.data)
+                else:
+                    self.message_user("Record yourself first")
+                    return
             else:
-                self.message_user("Record yourself first")
-                return
+                if self.after.data is not None:
+                    scipy.io.wavfile.write(RECS_DIR + "/" + self.record_name, f_sampling, self.after.data)
+                else:
+                    self.message_user("Record yourself or trim the recording")
+                    return
+            self.model.insertRows(self.record_name)
+            self.accept()
         else:
-            if self.after.data is not None:
-                scipy.io.wavfile.write(RECS_DIR + "/" + self.record_name, f_sampling, self.after.data)
-            else:
-                self.message_user("Record yourself or trim the recording")
-                return
-        self.model.insertRows(self.record_name)
-        self.accept()
+            self.message_user('Recording ' + self.record_name_edit.text() + ' already exists!')
 
     def is_data_valid(self):
         if utils.is_valid_path(str(self.record_name_edit.text())):
