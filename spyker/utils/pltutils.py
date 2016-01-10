@@ -2,7 +2,6 @@ from matplotlib import cm
 # noinspection PyUnresolvedReferences
 from mpl_toolkits.mplot3d import Axes3D
 from spyker.model.draggableplots import DraggableLine
-import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -56,33 +55,15 @@ def plot_function(fig, data, clear=True):
     # fig.savefig('samplefigure', bbox_inches='tight')
 
 
-def plot_3d_line(main_plot_fig, data, nr, xory):
-    ax = main_plot_fig.axes[0]
-    if ax.lines:
-        ax.lines.pop(0)  # remove previous line
-
-    if xory == 'x':  # kroje w czasie i mam czestotliwosc na poziomej
-        x = np.linspace(0, data['z_vector'][-1], len(data['z_vector']))
-        element = data['x_vector'][:, nr][0]
-        y = [element] * len(x)
-        ax.plot(x, y, 1, 'r-')
-
-    elif xory == 'y':  # kroje w czestotliwosci i mam czas na poziomej
-        x = data['x_vector'][0]
-        element = data['z_vector'][nr, :][0]
-        y = [element] * len(x)
-        ax.plot(y, x, 1, 'r-')
-
-
-def plt_single(fig, data, nr, xory, main_plot_fig, is3D):
+def plt_single_line(fig, data, nr, x_or_y, main_plot_fig, is_3d):
     fig.clear()
     ax = fig.add_subplot(1, 1, 1)
 
     labels = data['labels']
     ax.set_ylabel(labels.get('zlabel'))
 
-    if xory == 'x':
-        if is3D:  # dla stft 3D
+    if x_or_y == 'x':
+        if is_3d:  # dla stft 3D
             ax.set_xlabel(labels.get('xlabel'))
             y_vector = data['y_vector'][:, nr]
             x_vector = data['z_vector']
@@ -92,8 +73,8 @@ def plt_single(fig, data, nr, xory, main_plot_fig, is3D):
             y_vector = data['y_vector'][:, nr]
             ax.plot(y_vector)
 
-    elif xory == 'y':
-        if is3D:
+    elif x_or_y == 'y':
+        if is_3d:
             ax.set_xlabel(labels.get('ylabel'))
             y_vector = data['y_vector'][nr]
             x_vector = data['x_vector'][0]
@@ -103,11 +84,45 @@ def plt_single(fig, data, nr, xory, main_plot_fig, is3D):
             y_vector = data['y_vector'][nr]
             ax.plot(y_vector)
     fig.tight_layout()
-
-    if is3D:
-        plot_3d_line(main_plot_fig, data, nr, xory)
-
         # fig.savefig('samplefigure', bbox_inches='tight')
+
+
+def plot_cursor(main_plot_fig, data, nr, x_or_y, is_3d):
+    ax = main_plot_fig.axes[0]
+    if (is_3d):
+        plot_3d_cursor(ax, data, nr, x_or_y)
+    else:
+        plot_2d_cursor(ax, data, nr, x_or_y)
+
+
+def plot_3d_cursor(ax, data, nr, x_or_y):
+    if ax.lines:
+        ax.lines.pop(0)  # remove previous line
+
+    if x_or_y == 'x':  # kroje w czasie i mam czestotliwosc na poziomej
+        x = np.linspace(0, data['z_vector'][-1], len(data['z_vector']))
+        element = data['x_vector'][:, nr][0]
+        y = [element] * len(x)
+
+    else:  # kroje w czestotliwosci i mam czas na poziomej
+        y = data['x_vector'][0]
+        element = data['z_vector'][nr, :][0]
+        x = [element] * len(y)
+
+    ax.plot(x, y, 1, 'r-')
+
+
+def plot_2d_cursor(ax, data, nr, x_or_y):
+    if ax.lines:
+        ax.lines.pop(0)  # remove previous line
+    if x_or_y == 'x':
+        x = [nr, nr]
+        y = [0, len(data['y_vector'])]
+    else:
+        x = [0, len(data['y_vector'][nr])]
+        y = [nr, nr]
+
+    ax.plot(x, y, 'r-')
 
 
 def plot_3d(fig, data):

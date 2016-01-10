@@ -1,6 +1,3 @@
-import sys
-
-import numpy as np
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
 
@@ -51,13 +48,3 @@ class EntryLayout(QtGui.QGridLayout):
             self.slider.setValue(slider_value)
             return
         self.should_update = True
-
-
-if __name__ == '__main__':
-    app = QtGui.QApplication(sys.argv)
-    awd = EntryLayout("elo ziomeczku")
-    dwa = QtGui.QDialog()
-    dwa.setLayout(awd)
-    dwa.resize(400, 80)
-    dwa.show()
-    sys.exit(app.exec_())

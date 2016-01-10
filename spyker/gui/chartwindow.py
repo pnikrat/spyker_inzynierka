@@ -12,7 +12,7 @@ from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 
 from spyker.gui.entrylayout import EntryLayout
 from spyker.utils.constants import RECS_DIR, ChartType
-from spyker.utils.pltutils import plt_single, plot_function, plot_3d
+from spyker.utils.pltutils import plt_single_line, plot_function, plot_3d, plot_3d_cursor, plot_cursor
 from spyker.utils.utils import get_kwargs
 
 
@@ -98,18 +98,22 @@ class ChartWindow(QtGui.QMainWindow):
 
     def init_cursors(self):
         self.x_cursor_layout.button.clicked.connect(
-                lambda: plt_single(self.second_fig, self.plotted_data, self.x_cursor_layout.slider.value(), 'x'
-                                   , self.fig, is_gca(self.function_name)))
-
+                lambda: plt_single_line(self.second_fig, self.plotted_data, self.x_cursor_layout.slider.value(), 'x'
+                                        , self.fig, is_3d(self.function_name)))
         self.x_cursor_layout.button.clicked.connect(self.second_canvas.draw)
-        self.x_cursor_layout.button.clicked.connect(self.canvas.draw)
+        self.x_cursor_layout.spinbox.valueChanged.connect(
+                lambda: plot_cursor(self.fig, self.plotted_data, self.x_cursor_layout.slider.value(), 'x',
+                                    is_3d(self.function_name)))
+        self.x_cursor_layout.spinbox.valueChanged.connect(self.canvas.draw)
 
         self.y_cursor_layout.button.clicked.connect(
-                lambda: plt_single(self.second_fig, self.plotted_data, self.y_cursor_layout.slider.value(), 'y'
-                                   , self.fig, is_gca(self.function_name)))
-
+                lambda: plt_single_line(self.second_fig, self.plotted_data, self.y_cursor_layout.slider.value(), 'y'
+                                        , self.fig, is_3d(self.function_name)))
         self.y_cursor_layout.button.clicked.connect(self.second_canvas.draw)
-        self.y_cursor_layout.button.clicked.connect(self.canvas.draw)
+        self.y_cursor_layout.spinbox.valueChanged.connect(
+                lambda: plot_cursor(self.fig, self.plotted_data, self.y_cursor_layout.slider.value(), 'y',
+                                    is_3d(self.function_name)))
+        self.y_cursor_layout.spinbox.valueChanged.connect(self.canvas.draw)
 
     def init_second_canvas(self):
         self.second_canvas_layout = QtGui.QVBoxLayout()
@@ -212,7 +216,7 @@ def is_two_d(function_name):
            and function_name != ChartType.MFCC
 
 
-def is_gca(function_name):
+def is_3d(function_name):
     return function_name == ChartType.STFT3D
 
 
