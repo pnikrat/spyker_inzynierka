@@ -10,7 +10,7 @@ from spyker.gui.filebutton import FileButton
 from spyker.gui.filelistview import FileListView
 from spyker.gui.recordwindow import RecordWindow
 from spyker.model.recording import SoundStream
-from spyker.utils.constants import RECS_DIR
+from spyker.utils.constants import RECS_DIR, f_sampling
 
 
 class FileGrid(QtGui.QGridLayout):
@@ -25,12 +25,15 @@ class FileGrid(QtGui.QGridLayout):
 
         add_button = FileButton("+", "#35ae56")
         add_button.clicked.connect(self.start_add_new_window)
+        add_button.setToolTip("Add new recording")
 
         remove_button = FileButton("-", "#d05d4f")
         remove_button.clicked.connect(self.confirm_deletion)
+        remove_button.setToolTip("Delete selected recording")
 
         play_button = FileButton("", "#35ae56", "icons/play.png")
         play_button.clicked.connect(lambda: self.play_recording())
+        play_button.setToolTip("Play selected recording")
 
         self.addWidget(file_grid_label, 0, 0, 1, 2)
         self.addWidget(self.list_view, 1, 0, 30, 1)
@@ -54,7 +57,7 @@ class FileGrid(QtGui.QGridLayout):
 
     def play_recording(self):
         current_recording = self.model.data(self.list_view.currentIndex(), QtCore.Qt.DisplayRole)
-        stream = SoundStream(1024, pyaudio.paInt16, 1, 44100)
+        stream = SoundStream(1024, pyaudio.paInt16, 1, f_sampling)
         stream.open_stream("out")
         stream.play_wav_recording(current_recording)
 
