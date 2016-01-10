@@ -1,7 +1,7 @@
 import math
 
+import matplotlib
 import numpy as np
-import numpy
 import scipy
 import scipy.io.wavfile
 import scipy.signal
@@ -14,19 +14,17 @@ from scipy.signal import lfilter, hamming
 def get_freqs_ticks(fs, data_length, ans_length):
     time = np.linspace(0, float(data_length) / fs, data_length)
     freq = np.fft.rfftfreq(time.shape[-1], 1.0 / fs)
-    locs = np.arange(0, ans_length, ans_length / 10)
-
+    locs = np.arange(0, ans_length + 0.0001, float(ans_length) / 10)
     max_freq = int(freq[-1])
-    labels = np.arange(0, max_freq, int(max_freq / 10))
+    labels = np.arange(0, max_freq + 0.0001, float(max_freq) / 10).astype(np.int, copy=False)
     ticks = {'locs': locs, 'labels': labels}
     return ticks
 
 
 def get_time_ticks(fs, data_length, ans_length):
-    locs = np.arange(0, ans_length, ans_length / 10)
+    locs = np.arange(0, ans_length + 0.0001, float(ans_length) / 10)
     max_time = float(data_length / fs)
-    print locs, data_length, fs, max_time
-    labels = np.arange(0, max_time+1, max_time / 10)
+    labels = np.arange(0, max_time + 0.0001, float(max_time) / 10)
     ticks = {'locs': locs, 'labels': labels}
     return ticks
 
@@ -109,7 +107,7 @@ def formant_freqs_on_fft(fs, data):
 
 def formant_freqs(fs, data):
     N = len(data)
-    w = numpy.hamming(N)
+    w = np.hamming(N)
 
     # Apply window and high pass filter.
     x1 = data * w
@@ -119,11 +117,11 @@ def formant_freqs(fs, data):
     A, e, k = lpc(x1, ncoeff)
 
     # Get roots.
-    rts = numpy.roots(A)
-    rts = [r for r in rts if numpy.imag(r) >= 0]
+    rts = np.roots(A)
+    rts = [r for r in rts if np.imag(r) >= 0]
 
     # Get angles.
-    angs = numpy.arctan2(numpy.imag(rts), numpy.real(rts))
+    angs = np.arctan2(np.imag(rts), np.real(rts))
 
     # Get frequencies.
     frqs = sorted(angs * (fs / (2 * math.pi)))
@@ -142,3 +140,11 @@ def stft3d(fs, data):
 
     labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Time [s]', 'zlabel': 'Amplitude [-]'}
     return {'y_vector': spectrum, 'x_vector': time, 'z_vector': freqs, 'labels': labels}
+
+
+def psd(fs, data):
+    Pxx, freqs = matplotlib.mlab.psd(data, NFFT=256, Fs=2, detrend=matplotlib.mlab.detrend_none,
+                                     window=matplotlib.mlab.window_hanning, noverlap=0, pad_to=None,
+                                     sides='default', scale_by_freq=None)
+    labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'power spectrum'}
+    return {'y_vector': Pxx, 'x_vector': freqs, 'labels': labels}

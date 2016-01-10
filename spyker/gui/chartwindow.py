@@ -1,6 +1,7 @@
 import inspect
 
 import matplotlib.pyplot as plt
+import numpy as np
 import scipy.io.wavfile
 import scipy.signal
 from PyQt4 import QtGui
@@ -37,7 +38,6 @@ class ChartWindow(QtGui.QMainWindow):
         self.layout = QtGui.QHBoxLayout()
         self.init_plot_layout()
         self.init_controls_layout()
-
 
         window = QtGui.QWidget()
         window.setLayout(self.layout)
@@ -81,11 +81,6 @@ class ChartWindow(QtGui.QMainWindow):
 
         plot_difference_layout = ComboLayout("Plot difference: ", self.file_list_model, self.plot_difference)
         self.params_layout.addLayout(plot_difference_layout)
-
-        self.incorrect_data_label = QtGui.QLabel("<font color=\"red\">* " + "files must have same length" + "</font>")
-        self.incorrect_data_label.setVisible(False)
-        self.params_layout.addWidget(self.incorrect_data_label)
-
         self.controls_layout.addLayout(self.params_layout)
 
     def init_cursors_layout(self):
@@ -152,11 +147,12 @@ class ChartWindow(QtGui.QMainWindow):
         recording_to_subtract = self.file_list_model.file_paths[index]
         file_to_subtract_fs, file_to_subtract_data = scipy.io.wavfile.read(RECS_DIR + '/' + recording_to_subtract)
 
-        if self.data.shape != file_to_subtract_data.shape:
-            self.incorrect_data_label.setVisible(True)
-            return
-        else:
-            self.incorrect_data_label.setVisible(False)
+        data_copy = np.ndarray.copy(self.data)
+
+        if data_copy.shape > file_to_subtract_data.shape:
+            data_copy.resize(file_to_subtract_data.shape)
+        elif data_copy.shape < file_to_subtract_data.shape:
+            file_to_subtract_data.resize(data_copy.shape)
 
         args = [self.fs, self.data] + self.get_kwargs()
         data_to_plot = self.function(*args)
@@ -169,19 +165,23 @@ class ChartWindow(QtGui.QMainWindow):
 
         data_to_plot['y_vector'] = y_vector_to_plot
         self.replot(data_to_plot)
-        self.replot(data_to_plot)
 
     def plot_sliders(self):
-        self.x_cursor_layout.set_maximum(len(self.plotted_data['y_vector'][0]) - 1)
-        self.y_cursor_layout.set_maximum(len(self.plotted_data['y_vector']) - 1)
+        x_slider_max = len(self.plotted_data['y_vector'][0]) - 1
+        x_real_max = self.plotted_data['xticks']['labels'][-1]
+        self.x_cursor_layout.set_maximum(x_slider_max, x_real_max)
+
+        y_slider_max = len(self.plotted_data['y_vector']) - 1
+        y_real_max = self.plotted_data['yticks']['labels'][-1]
+        self.y_cursor_layout.set_maximum(y_slider_max, y_real_max)
 
     def add_kwarg_fields(self):
         if inspect.getargspec(self.function).defaults is not None:
             for k, v in get_kwargs(self.function).iteritems():
                 edit_layout = QtGui.QGridLayout()
 
-                edit_layout.setColumnStretch(0,1)
-                edit_layout.setColumnStretch(1,2)
+                edit_layout.setColumnStretch(0, 1)
+                edit_layout.setColumnStretch(1, 2)
                 label = QtGui.QLabel(k)
                 kwarg_edit = QtGui.QLineEdit(str(v))
                 edit_layout.addWidget(label, 0, 0)
