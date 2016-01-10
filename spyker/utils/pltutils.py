@@ -46,11 +46,33 @@ def plot_function(fig, data, clear=True):
         xlabels = xticks['labels']
         plt.xticks(xlocs, xlabels, rotation='vertical')
 
+    if 'logarithmic' in data:
+        ax.set_yscale('log')
+
     fig.tight_layout()
     fig.savefig('samplefigure', bbox_inches='tight')
 
 
-def plt_single(fig, data, nr, xory):
+def plot_3d_line(main_plot_fig, data, nr, xory):
+    ax = main_plot_fig.axes[0]
+    if ax.lines:
+        ax.lines.pop(0) #remove previous line
+
+    if xory == 'x': # kroje w czasie i mam czestotliwosc na poziomej
+        x = np.linspace(0, data['z_vector'][-1], len(data['z_vector']))
+        element = data['x_vector'][:, nr][0]
+        y = [element] * len(x)
+        ax.plot(x, y, 1, 'r-')
+
+    elif xory == 'y': # kroje w czestotliwosci i mam czas na poziomej
+        x = data['x_vector'][0]
+        element = data['z_vector'][nr, :][0]
+        y = [element] * len(x)
+        ax.plot(y, x, 1, 'r-')
+
+
+
+def plt_single(fig, data, nr, xory, main_plot_fig, is3D):
     fig.clear()
     ax = fig.add_subplot(1, 1, 1)
 
@@ -58,15 +80,31 @@ def plt_single(fig, data, nr, xory):
     ax.set_ylabel(labels.get('zlabel'))
 
     if xory == 'x':
-        ax.set_xlabel(labels.get('ylabel'))
-        y_vector = data['y_vector'][:, nr]
-        ax.plot(y_vector)
+        if is3D: # dla stft 3D
+            ax.set_xlabel(labels.get('xlabel'))
+            y_vector = data['y_vector'][:, nr]
+            x_vector = data['z_vector']
+            ax.plot(x_vector, y_vector)
+        else: # dla stft i mffc
+            ax.set_xlabel(labels.get('ylabel'))
+            y_vector = data['y_vector'][:, nr]
+            ax.plot(y_vector)
 
     elif xory == 'y':
-        ax.set_xlabel(labels.get('xlabel'))
-        y_vector = data['y_vector'][nr]
-        ax.plot(y_vector)
+        if is3D:
+            ax.set_xlabel(labels.get('ylabel'))
+            y_vector = data['y_vector'][nr]
+            x_vector = data['x_vector'][0]
+            ax.plot(x_vector, y_vector)
+        else:
+            ax.set_xlabel(labels.get('xlabel'))
+            y_vector = data['y_vector'][nr]
+            ax.plot(y_vector)
     fig.tight_layout()
+
+    if is3D:
+        plot_3d_line(main_plot_fig, data, nr, xory)
+
     fig.savefig('samplefigure', bbox_inches='tight')
 
 
@@ -77,14 +115,15 @@ def plot_3d(fig, data):
     ax = fig.gca(projection='3d')
     z_vector = data['y_vector']  # podmiana wektorow (przekazuje spectrum w y_vector aby zgadzalo sie z plt_single)
     y_vector = data['z_vector']
-
     labels = data['labels']
 
     ax.set_xlabel(labels.get('xlabel'))
     ax.set_ylabel(labels.get('ylabel'))
+    ax.set_zlabel(labels.get('zlabel'))
 
     ax.autoscale(enable=True, axis='both', tight=True)
     surf = ax.plot_surface(y_vector, x_vector, z_vector, rstride=2, cstride=2, cmap=cm.coolwarm, linewidth=0)
+
     fig.colorbar(surf)
     fig.tight_layout()
     fig.savefig('samplefigure', bbox_inches='tight')

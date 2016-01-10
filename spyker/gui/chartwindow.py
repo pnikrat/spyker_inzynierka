@@ -45,6 +45,7 @@ class ChartWindow(QtGui.QMainWindow):
 
     def init_figure(self):
         self.fig = plt.figure()
+        self.second_fig = plt.figure()
         self.ax = self.fig.add_subplot(1, 1, 1)
         self.vline = self.ax.axvline(color='r')
         self.hline = self.ax.axhline(color='y')
@@ -102,17 +103,32 @@ class ChartWindow(QtGui.QMainWindow):
 
     def init_cursors(self):
         self.x_cursor_layout.button.clicked.connect(
-                lambda: plt_single(self.fig, self.plotted_data, self.x_cursor_layout.slider.value(), 'x'))
+                lambda: plt_single(self.second_fig, self.plotted_data, self.x_cursor_layout.slider.value(), 'x'
+                                   , self.fig, is_gca(self.function_name)))
+
+        self.x_cursor_layout.button.clicked.connect(self.second_canvas.draw)
         self.x_cursor_layout.button.clicked.connect(self.canvas.draw)
 
         self.y_cursor_layout.button.clicked.connect(
-                lambda: plt_single(self.fig, self.plotted_data, self.y_cursor_layout.slider.value(), 'y'))
+                lambda: plt_single(self.second_fig, self.plotted_data, self.y_cursor_layout.slider.value(), 'y'
+                                   , self.fig, is_gca(self.function_name)))
+
+        self.y_cursor_layout.button.clicked.connect(self.second_canvas.draw)
         self.y_cursor_layout.button.clicked.connect(self.canvas.draw)
+
+    def init_second_canvas(self):
+        self.second_canvas_layout = QtGui.QVBoxLayout()
+        self.second_canvas = FigureCanvas(self.second_fig)
+        self.second_toolbar = NavigationToolbar2QT(self.second_canvas, self)
+        self.second_canvas_layout.addWidget(self.second_canvas)
+        self.second_canvas_layout.addWidget(self.second_toolbar)
+        self.controls_layout.addLayout(self.second_canvas_layout)
 
     def init_plot(self):
 
         self.replot(self.function(*self.get_args()))
         if not is_two_d(self.function_name):
+            self.init_second_canvas()
             self.init_cursors_layout()
             self.init_cursors()
             self.plot_sliders()
@@ -151,7 +167,6 @@ class ChartWindow(QtGui.QMainWindow):
     def plot_difference(self, index):
         recording_to_subtract = self.file_list_model.file_paths[index]
         file_to_subtract_fs, file_to_subtract_data = scipy.io.wavfile.read(RECS_DIR + '/' + recording_to_subtract)
-
         if self.data.shape != file_to_subtract_data.shape:
             self.incorrect_data_label.setVisible(True)
             return
@@ -195,6 +210,8 @@ def is_two_d(function_name):
     return function_name != ChartType.STFT3D and function_name != ChartType.STFT \
            and function_name != ChartType.MFCC
 
+def is_gca(function_name):
+    return function_name == ChartType.STFT3D
 
 class ComboLayout(QtGui.QHBoxLayout):
     def __init__(self, name, model, fun_to_call):

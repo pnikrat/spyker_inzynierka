@@ -16,7 +16,7 @@ def get_freqs_ticks(fs, data_length, ans_length):
     freq = np.fft.rfftfreq(time.shape[-1], 1.0 / fs)
     locs = np.arange(0, ans_length, ans_length / 10)
 
-    max_freq = int(freq[-1])
+    max_freq = int(freq[-1]) # -1
     labels = np.arange(0, max_freq, int(max_freq / 10))
     ticks = {'locs': locs, 'labels': labels}
     return ticks
@@ -45,18 +45,23 @@ def stft(fs, data, frame_size=0.05, hop=0.025):
 
 
 def fft2(fs, data, frame_size=0.05, hop=0.025):
+    #time = np.linspace(0, float(len(data)) / fs, len(data))
+    #freq = np.fft.rfftfreq(time.shape[-1], 1.0 / fs)
     frame_samp = int(frame_size * fs)
     hop_samp = int(hop * fs)
     w = scipy.hanning(frame_samp)
 
     ans = scipy.array([np.fft.rfft(w * data[i:i + frame_samp])
                        for i in range(0, len(data) - frame_samp, hop_samp)])
+    # ans.shape -> (39, 1103) czyli wiersze to numery kolejnych ramek, a kolumny to wynik rfft ?
     ans = scipy.absolute(ans.T)
     ans = [sum(i) / len(i) for i in ans]
+    xrng = len(ans)
+    ans = scipy.array(ans) # zmiana z listy na numpy array bo w pltutils pracuje na typie numpy array
     labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Amplitude [-]'}
-    return {'y_vector': ans, 'x_vector': range(0, len(ans)), 'labels': labels,
-            'xticks': get_freqs_ticks(fs, len(data), len(ans))}
-
+   # return {'y_vector': ans, 'x_vector': freq[:len(ans)], 'labels': labels, 'logarithmic': True}
+    return {'y_vector': ans, 'x_vector': range(0, xrng), 'labels': labels,
+            'xticks': get_freqs_ticks(fs, len(data), xrng), 'logarithmic': True}
 
 def mfccoefs(fs, data, nwin=256, nfft=512, nceps=13):
     ceps, mspec, spec = mfcc(data, nwin, nfft, fs, nceps)
@@ -86,6 +91,7 @@ def fft(fs, data):
     compledata_array = np.fft.rfft(data)
     module = ((compledata_array.real ** 2 + compledata_array.imag ** 2) ** 0.5) / len(data)
     freq = np.fft.rfftfreq(time.shape[-1], 1.0 / fs)
+
     # module = module[:(len(module) / 2)]
     # freq = freq[:(len(freq) / 2)]
     labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Amplitude [-]'}
@@ -93,7 +99,7 @@ def fft(fs, data):
 
 
 def envelope(fs, data):
-    fftdict = fft(fs, data)
+    fftdict = fft2(fs, data)
 
     env = abs(scipy.signal.hilbert(fftdict['y_vector']))
     labels = {'xlabel': 'Time [s]', 'ylabel': 'Amplitude [-]'}
@@ -101,8 +107,7 @@ def envelope(fs, data):
 
 
 def formant_freqs_on_fft(fs, data):
-    return dict(fft(fs, data).items() + {'cursors': formant_freqs(fs, data)}.items())
-
+    return dict(fft2(fs, data).items() + {'cursors': formant_freqs(fs, data)}.items())
 
     # na usrednionym widmie gestosci mocy
 
