@@ -170,7 +170,7 @@ class ChartWindow(QtGui.QMainWindow):
         elif data_copy.shape < file_to_subtract_data.shape:
             file_to_subtract_data.resize(data_copy.shape)
 
-        args = [self.fs, self.data] + self.get_kwargs()
+        args = [self.fs, data_copy] + self.get_kwargs()
         data_to_plot = self.function(*args)
         minuend_y_vector = data_to_plot['y_vector']
 

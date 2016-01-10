@@ -49,12 +49,11 @@ def plot_function(fig, data, clear=True):
         ax.set_xticks(xlocs)
         ax.set_xticklabels(xlabels)
 
-
     if 'logarithmic' in data:
         ax.set_yscale('log')
 
     fig.tight_layout()
-    fig.savefig('samplefigure', bbox_inches='tight')
+    # fig.savefig('samplefigure', bbox_inches='tight')
 
 
 def plot_3d_line(main_plot_fig, data, nr, xory):
@@ -108,7 +107,7 @@ def plt_single(fig, data, nr, xory, main_plot_fig, is3D):
     if is3D:
         plot_3d_line(main_plot_fig, data, nr, xory)
 
-    fig.savefig('samplefigure', bbox_inches='tight')
+        # fig.savefig('samplefigure', bbox_inches='tight')
 
 
 def plot_3d(fig, data):
@@ -129,7 +128,7 @@ def plot_3d(fig, data):
 
     fig.colorbar(surf)
     fig.tight_layout()
-    fig.savefig('samplefigure', bbox_inches='tight')
+    # fig.savefig('samplefigure', bbox_inches='tight')
 
 
 def plot_trimmable(fig, data):
