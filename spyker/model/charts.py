@@ -29,6 +29,13 @@ def get_time_ticks(fs, data_length, ans_length):
     return ticks
 
 
+def get_unchanged_ticks(ans_lenght):
+    locs = np.arange(0, ans_lenght)
+    labels = np.arange(0, ans_lenght)
+    ticks = {'locs': locs, 'labels': labels}
+    return ticks
+
+
 def stft(fs, data, frame_size=0.05, hop=0.025):
     frame_samp = int(frame_size * fs)
     hop_samp = int(hop * fs)
@@ -64,8 +71,10 @@ def fft2(fs, data, frame_size=0.05, hop=0.025):
 
 def mfccoefs(fs, data, nwin=256, nfft=512, nceps=13):
     ceps, mspec, spec = mfcc(data, nwin, nfft, fs, nceps)
-    labels = {'xlabel': 'Coefficient number', 'ylabel': 'Frame number', 'zlabel': ''}
-    return {'y_vector': ceps, 'x_vector': None, 'labels': labels}
+    labels = {'xlabel': 'Coefficient number [-]', 'ylabel': 'Time [s]', 'zlabel': ''}
+    return {'y_vector': ceps, 'x_vector': None, 'labels': labels,
+            'yticks': get_time_ticks(fs, len(data), len(ceps)),
+            'xticks': get_unchanged_ticks(len(ceps.T))}
 
 
 def raw(fs, data):
@@ -145,7 +154,9 @@ def stft3d(fs, data):
     time, freqs = np.meshgrid(time, freqs, sparse=True)
 
     labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Time [s]', 'zlabel': 'Amplitude [-]'}
-    return {'y_vector': spectrum, 'x_vector': time, 'z_vector': freqs, 'labels': labels}
+    return {'y_vector': spectrum, 'x_vector': time, 'z_vector': freqs, 'labels': labels,
+            'yticks': get_freqs_ticks(fs, len(data), len(spectrum)),
+            'xticks': get_time_ticks(fs, len(data), len(spectrum.T))}
 
 
 def psd(fs, data):

@@ -28,23 +28,27 @@ def plot_function(fig, data, clear=True):
     if len(labels) == 2:
         ax.plot(x_vector, y_vector, label=data['legend'])
         ax.legend()
+
     elif len(labels) == 3:
         pax = ax.pcolormesh(y_vector)
         cbar = fig.colorbar(pax)
         cbar.ax.set_ylabel(labels['zlabel'])
         ax.autoscale(enable=True, axis='both', tight=True)
-        
+
     if 'yticks' in data:
         yticks = data['yticks']
         ylocs = yticks['locs']
         ylabels = yticks['labels']
-        plt.yticks(ylocs, ylabels)
+        ax.set_yticks(ylocs)
+        ax.set_yticklabels(ylabels)
 
     if 'xticks' in data:
         xticks = data['xticks']
         xlocs = xticks['locs']
         xlabels = xticks['labels']
-        plt.xticks(xlocs, xlabels, rotation='vertical')
+        ax.set_xticks(xlocs)
+        ax.set_xticklabels(xlabels)
+
 
     if 'logarithmic' in data:
         ax.set_yscale('log')
@@ -56,20 +60,19 @@ def plot_function(fig, data, clear=True):
 def plot_3d_line(main_plot_fig, data, nr, xory):
     ax = main_plot_fig.axes[0]
     if ax.lines:
-        ax.lines.pop(0) #remove previous line
+        ax.lines.pop(0)  # remove previous line
 
-    if xory == 'x': # kroje w czasie i mam czestotliwosc na poziomej
+    if xory == 'x':  # kroje w czasie i mam czestotliwosc na poziomej
         x = np.linspace(0, data['z_vector'][-1], len(data['z_vector']))
         element = data['x_vector'][:, nr][0]
         y = [element] * len(x)
         ax.plot(x, y, 1, 'r-')
 
-    elif xory == 'y': # kroje w czestotliwosci i mam czas na poziomej
+    elif xory == 'y':  # kroje w czestotliwosci i mam czas na poziomej
         x = data['x_vector'][0]
         element = data['z_vector'][nr, :][0]
         y = [element] * len(x)
         ax.plot(y, x, 1, 'r-')
-
 
 
 def plt_single(fig, data, nr, xory, main_plot_fig, is3D):
@@ -80,12 +83,12 @@ def plt_single(fig, data, nr, xory, main_plot_fig, is3D):
     ax.set_ylabel(labels.get('zlabel'))
 
     if xory == 'x':
-        if is3D: # dla stft 3D
+        if is3D:  # dla stft 3D
             ax.set_xlabel(labels.get('xlabel'))
             y_vector = data['y_vector'][:, nr]
             x_vector = data['z_vector']
             ax.plot(x_vector, y_vector)
-        else: # dla stft i mffc
+        else:  # dla stft i mffc
             ax.set_xlabel(labels.get('ylabel'))
             y_vector = data['y_vector'][:, nr]
             ax.plot(y_vector)
