@@ -72,6 +72,7 @@ def plt_single_line(fig, data, nr, x_or_y, main_plot_fig, is_3d):
             ax.set_xlabel(labels.get('ylabel'))
             y_vector = data['y_vector'][:, nr]
             ax.plot(y_vector)
+        ticks = data['yticks']
 
     elif x_or_y == 'y':
         if is_3d:
@@ -83,8 +84,15 @@ def plt_single_line(fig, data, nr, x_or_y, main_plot_fig, is_3d):
             ax.set_xlabel(labels.get('xlabel'))
             y_vector = data['y_vector'][nr]
             ax.plot(y_vector)
+        ticks = data['xticks']
+
+    locs = ticks['locs']
+    labels = ticks['labels']
+    ax.set_xticks(locs)
+    ax.set_xticklabels(labels)
+
     fig.tight_layout()
-        # fig.savefig('samplefigure', bbox_inches='tight')
+    # fig.savefig('samplefigure', bbox_inches='tight')
 
 
 def plot_cursor(main_plot_fig, data, nr, x_or_y, is_3d):
