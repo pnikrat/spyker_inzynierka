@@ -4,7 +4,7 @@ import scipy.io.wavfile
 
 import spyker.utils.utils as utils
 from spyker.model.recording import *
-from spyker.model.recording import SoundStream, autotrimalgo
+from spyker.model.recording import SoundStream, trimauto
 from spyker.utils.constants import RECS_DIR
 from spyker.utils.constants import f_sampling
 
@@ -154,7 +154,7 @@ class RecordWindow(QtGui.QDialog):
     def message_user(self, message):
         self.ui_message.setText("<font color=\"red\">* " + message + "</font>")
 
-    def disabling_elements(self, elements, state):
+    def disable_elements(self, elements, state):
         for x in elements:
             x.setDisabled(state)
 
@@ -166,7 +166,7 @@ class RecordWindow(QtGui.QDialog):
 
     def record(self):
         if self.is_data_valid():
-            self.disabling_elements(self.trim_radio_buttons, True)
+            self.disable_elements(self.trim_radio_buttons, True)
 
             self.message_user("Recording!") #NOT WORKING!
             self.record_duration = int(self.record_duration_spin.value())
@@ -187,14 +187,14 @@ class RecordWindow(QtGui.QDialog):
                 self.autotrim()
 
     def autotrim(self):
-        self.after.data = autotrimalgo(np.copy(self.before.data))
+        self.after.data = trimauto(np.copy(self.before.data))
         self.after.replot(self.trim)
         self.after.data2frames()
 
     def cancel_recording(self):
         self.before.clear_data()
         self.after.clear_data()
-        self.disabling_elements(self.trim_radio_buttons, False)
+        self.disable_elements(self.trim_radio_buttons, False)
 
     def play(self, which_one):
         self.play_button_before.setEnabled(False)
@@ -226,7 +226,7 @@ class RecordWindow(QtGui.QDialog):
             xpos.append(pos1[0])
             xpos.append(pos2[0])
             xpos.sort()
-            self.after.data = manualtrimalgo(np.copy(self.before.data), np.copy(self.before.timedata), tuple(xpos))
+            self.after.data = trimmanual(np.copy(self.before.data), np.copy(self.before.timedata), tuple(xpos))
             self.after.data2frames()
             self.after.replot('n')
             self.message_user('Trim successful')

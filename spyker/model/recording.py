@@ -104,7 +104,7 @@ class TrimCanvas(QtGui.QWidget):
         self.frames = [bytes[i:i+2048] for i in range(0, len(bytes), 2048)]
 
 
-def autotrimalgo(data_to_trim):
+def trimauto(data_to_trim):
     datacopy = np.copy(data_to_trim)
     datacopy = datacopy / 32768.0
     mean = np.mean(datacopy)
@@ -136,7 +136,7 @@ def findindex(numpyarray, coord):
     return np.nonzero(abs(numpyarray-coord) <= 0.00002) #distance between samples if 44100hz sampling recording is used
 
 
-def manualtrimalgo(data_to_trim, timedata, timecoords):
+def trimmanual(data_to_trim, timedata, timecoords):
     'assumes timecoords are already sorted'
     begin, end = timecoords
 

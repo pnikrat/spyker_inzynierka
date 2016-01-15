@@ -11,3 +11,4 @@ class ChartType:
     STFT3D = 'stft3d'
     ENVELOPE = 'envelope'
     FORMANTS = 'formants'
+    PSD = 'psd'

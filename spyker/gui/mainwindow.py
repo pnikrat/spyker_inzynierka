@@ -24,7 +24,7 @@ class FileGrid(QtGui.QGridLayout):
         file_grid_label = QtGui.QLabel('Nagrania')
 
         add_button = FileButton("+", "#35ae56")
-        add_button.clicked.connect(self.start_add_new_window)
+        add_button.clicked.connect(self.start_new_record_window)
         add_button.setToolTip("Add new recording")
 
         remove_button = FileButton("-", "#d05d4f")
@@ -43,7 +43,7 @@ class FileGrid(QtGui.QGridLayout):
         self.setRowStretch(0, 0)
         self.setRowStretch(1, 10)
 
-    def start_add_new_window(self):
+    def start_new_record_window(self):
         self.new_record_window = RecordWindow(self.model)
         self.new_record_window.exec_()
 
@@ -80,10 +80,10 @@ class PlotGrid(QtGui.QGridLayout):
     def __init__(self, Fmodel, Cmodel, Fview, Cview):
         super(PlotGrid, self).__init__()
 
-        self.Fmodel = Fmodel
-        self.Cmodel = Cmodel
-        self.Fview = Fview
-        self.Cview = Cview
+        self.file_model = Fmodel
+        self.chart_model = Cmodel
+        self.file_view = Fview
+        self.chart_view = Cview
         self.current_chart_key = None
         self.current_chart_value = None
         self.current_recording = None
@@ -103,18 +103,19 @@ class PlotGrid(QtGui.QGridLayout):
         self.addWidget(self.plot_button, 2, 0, 1, 2)
 
     def button_clicked(self):
-        # try:
-            chart_window = ChartWindow(self.current_chart_value, self.current_recording, self.current_chart_key, self.Fmodel)
+        try:
+            chart_window = ChartWindow(self.current_chart_value, self.current_recording, self.current_chart_key,
+                                       self.file_model)
             chart_window.show()
-        # except TypeError:
-        #     self.chart_label.setText("Choose chart type and file first!")
+        except TypeError:
+            self.chart_label.setText("Choose chart type and file first!")
 
     def labels_change(self):
-        self.current_recording = self.Fmodel.data(self.Fview.currentIndex(), QtCore.Qt.DisplayRole)
+        self.current_recording = self.file_model.data(self.file_view.currentIndex(), QtCore.Qt.DisplayRole)
         self.file_label.setText('Current file is: %s' % self.current_recording)
 
-        self.current_chart_key, self.current_chart_value = self.Cmodel.data(self.Cview.currentIndex(),
-                                                                            QtCore.Qt.UserRole)
+        self.current_chart_key, self.current_chart_value = self.chart_model.data(self.chart_view.currentIndex(),
+                                                                                 QtCore.Qt.UserRole)
         self.chart_label.setText('Current chart is: %s' % self.current_chart_key)
 
 

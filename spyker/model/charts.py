@@ -8,23 +8,24 @@ import scipy.signal
 from matplotlib.mlab import specgram
 from scikits.talkbox import lpc
 from scikits.talkbox.features import mfcc
-from scipy.signal import lfilter, hamming
+from scipy.signal import lfilter
 
+NUMBER_OF_TICKS = 10
 
 def get_freqs_ticks(fs, data_length, ans_length):
     time = np.linspace(0, float(data_length) / fs, data_length)
     freq = np.fft.rfftfreq(time.shape[-1], 1.0 / fs)
-    locs = np.arange(0, ans_length + 0.0001, float(ans_length) / 10)
+    locs = np.arange(0, ans_length + 0.0001, float(ans_length) / NUMBER_OF_TICKS)
     max_freq = int(freq[-1])
-    labels = np.arange(0, max_freq + 0.0001, float(max_freq) / 10).astype(np.int, copy=False)
+    labels = np.arange(0, max_freq + 0.0001, float(max_freq) / NUMBER_OF_TICKS).astype(np.int, copy=False)
     ticks = {'locs': locs, 'labels': labels}
     return ticks
 
 
 def get_time_ticks(fs, data_length, ans_length):
-    locs = np.arange(0, ans_length + 0.0001, float(ans_length) / 10)
+    locs = np.arange(0, ans_length + 0.0001, float(ans_length) / NUMBER_OF_TICKS)
     max_time = float(data_length / fs)
-    labels = np.arange(0, max_time + 0.0001, float(max_time) / 10)
+    labels = np.arange(0, max_time + 0.0001, float(max_time) / NUMBER_OF_TICKS)
     ticks = {'locs': locs, 'labels': labels}
     return ticks
 
@@ -94,7 +95,7 @@ def raw(fs, data):
 
 def fft(fs, data):
     time = np.linspace(0, float(len(data)) / fs, len(data))
-    window = scipy.signal.hamming(len(data), False)
+    window = scipy.signal.hanning(len(data), False)
     data = data * window
     compledata_array = np.fft.rfft(data)
     module = ((compledata_array.real ** 2 + compledata_array.imag ** 2) ** 0.5) / len(data)
@@ -115,14 +116,14 @@ def envelope(fs, data):
 
 
 def formant_freqs_on_fft(fs, data):
-    return dict(fft2(fs, data).items() + {'cursors': formant_freqs(fs, data)}.items())
+    return dict(fft(fs, data).items() + {'cursors': formant_freqs(fs, data)}.items())
 
     # na usrednionym widmie gestosci mocy
 
 
 def formant_freqs(fs, data):
     N = len(data)
-    w = np.hamming(N)
+    w = np.hanning(N)
 
     # Apply window and high pass filter.
     x1 = data * w
