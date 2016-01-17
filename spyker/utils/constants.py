@@ -6,11 +6,10 @@ f_sampling = 44100
 
 
 class ChartType:
-    RAW = u'sygnał'
-    MFCC = 'mfcc'
-    STFT = 'stft'
-    FFT = 'fft'
-    STFT3D = 'stft3d'
-    ENVELOPE = 'obwiednia'
-    FORMANTS = 'formanty'
-    PSD = 'psd'
+    RAW = u'Sygnał'
+    MFCC = 'MFCC'
+    STFT = 'STFT'
+    FFT = 'FFT'
+    STFT3D = 'STFT3D'
+    FORMANTS = 'Formanty'
+    PSD = 'PSD'

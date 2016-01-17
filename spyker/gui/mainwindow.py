@@ -51,7 +51,7 @@ class FileGrid(QtGui.QGridLayout):
         self.new_record_window.exec_()
 
     def confirm_deletion(self):
-        dialog_window = DialogWindow(self.model, 'Czy jesteś pewien?')
+        dialog_window = DialogWindow(self.model, u'Czy jesteś pewien?')
         if dialog_window.exec_():
             if dialog_window.result:
                 file_name = self.list_view.currentIndex().data().toString()
@@ -70,7 +70,7 @@ class ChartGrid(QtGui.QGridLayout):
         super(ChartGrid, self).__init__()
 
         self.model = model
-        chart_grid_label = QtGui.QLabel('Wykresy')
+        chart_grid_label = QtGui.QLabel(u'Przekształcenia')
 
         self.list_view = ChartListView(self.model)
         self.addWidget(chart_grid_label, 0, 0, 1, 1)
@@ -96,7 +96,7 @@ class PlotGrid(QtGui.QGridLayout):
 
         self.chart_label = QtGui.QLabel(u'Przekształcenie: ')
 
-        self.plot_button = QtGui.QPushButton('Plot')
+        self.plot_button = QtGui.QPushButton(u'Wykreśl')
         self.plot_button.clicked.connect(self.button_clicked)
 
         self.addWidget(self.file_label, 0, 0, 1, 2)
@@ -115,11 +115,11 @@ class PlotGrid(QtGui.QGridLayout):
 
     def labels_change(self):
         self.current_recording = self.file_model.data(self.file_view.currentIndex(), QtCore.Qt.DisplayRole)
-        self.file_label.setText(u'Nagranie:  %s' % self.current_recording)
+        self.file_label.setText(u'Nagranie:  %s' % unicode(self.current_recording))
 
         self.current_chart_key, self.current_chart_value = self.chart_model.data(self.chart_view.currentIndex(),
                                                                                  QtCore.Qt.UserRole)
-        self.chart_label.setText(u'Przekształcenie: %s' % self.current_chart_key)
+        self.chart_label.setText(u'Przekształcenie: %s' % unicode(self.current_chart_key))
 
 
 class MainWindow(QtGui.QWidget):
@@ -161,4 +161,4 @@ class MainWindow(QtGui.QWidget):
         hbox.addWidget(splitter2)
         self.setLayout(hbox)
         self.setGeometry(200, 200, 700, 250)
-        self.setWindowTitle('Main window')
+        self.setWindowTitle('Nazwa aplikacji')

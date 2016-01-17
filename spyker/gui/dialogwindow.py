@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from PyQt4 import QtGui
 
 
@@ -11,8 +14,8 @@ class DialogWindow(QtGui.QDialog):
 
         self.message_label = QtGui.QLabel(message)
 
-        self.yes_button = QtGui.QPushButton('Yes')
-        self.no_button = QtGui.QPushButton('No')
+        self.yes_button = QtGui.QPushButton('Tak')
+        self.no_button = QtGui.QPushButton('Nie')
         self.no_button.clicked.connect(lambda: self.no_decision())
         self.yes_button.clicked.connect(lambda: self.yes_decision())
 
@@ -23,7 +26,7 @@ class DialogWindow(QtGui.QDialog):
 
         self.setLayout(grid)
         self.setGeometry(200, 200, 100, 100)
-        self.setWindowTitle('Confirm')
+        self.setWindowTitle(u'Potwierdzenie')
 
     def no_decision(self):
         self.result = False

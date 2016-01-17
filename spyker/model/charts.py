@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import math
-
 import matplotlib
 import numpy as np
 import scipy
@@ -11,6 +10,7 @@ from matplotlib.mlab import specgram
 from scikits.talkbox import lpc
 from scikits.talkbox.features import mfcc
 from scipy.signal import lfilter
+
 
 NUMBER_OF_TICKS = 10
 

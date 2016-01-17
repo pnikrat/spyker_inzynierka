@@ -5,6 +5,7 @@ from collections import OrderedDict
 
 def is_valid_path(path):
     try:
+        path = unicode(path)
         open(path, 'w')
         os.unlink(path)
         return True
@@ -18,6 +19,7 @@ def is_number(number):
         return True
     except ValueError:
         return False
+
 
 def get_kwargs(function):
     argspec = inspect.getargspec(function)

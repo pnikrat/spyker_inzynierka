@@ -1,4 +1,6 @@
-import numpy as np
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import scipy.io.wavfile
 import scipy.io.wavfile
 
@@ -26,53 +28,53 @@ class RecordWindow(QtGui.QDialog):
         self.before = TrimCanvas()
         self.after = TrimCanvas()
 
-        self.record_name_label = QtGui.QLabel('Name')
+        self.record_name_label = QtGui.QLabel('Nazwa')
         self.record_name_edit = QtGui.QLineEdit()
-        self.record_name_edit.setToolTip("Put recording name here")
+        self.record_name_edit.setToolTip(u"Podaj nazwę pliku")
 
-        self.record_duration_label = QtGui.QLabel('Recording length')
+        self.record_duration_label = QtGui.QLabel(u'Czas nagrywania')
         self.record_duration_spin = QtGui.QSpinBox()
-        self.record_duration_spin.setToolTip("Set recording time")
+        self.record_duration_spin.setToolTip(u"Jak długo będzie trwało nagrywanie")
         self.record_duration_spin.setValue(2)
         self.record_duration_spin.setRange(2, 4)
         self.record_duration_spin.valueChanged.connect(lambda: self.rec_spin())
 
-        self.interval_label = QtGui.QLabel('Trim interval length')
+        self.interval_label = QtGui.QLabel(u'Długość po przycięciu')
         self.interval_spin = QtGui.QSpinBox()
-        self.interval_spin.setToolTip("This option determines the width between 2 cursors in manual trim mode."
-                                      " It always has a lower value than Recording length")
+        self.interval_spin.setToolTip(u"Ta opcja określa odległość pomiędzy dwoma znacznikami przycinającymi."
+                                      u" Wartość zawsze mniejsza od czasu nagrywania")
         self.interval_spin.setValue(1)
         self.interval_spin.setRange(1, 1)
         self.interval_spin.valueChanged.connect(lambda : self.int_spin())
 
-        self.record_button = QtGui.QPushButton('Record')
+        self.record_button = QtGui.QPushButton('Nagrywaj')
         self.record_button.clicked.connect(lambda: self.record())
 
-        self.play_button_before = QtGui.QPushButton('Play signal before trimming')
+        self.play_button_before = QtGui.QPushButton(u'Odtwórz sygnał przed przycięciem')
         self.play_button_before.clicked.connect(lambda: self.play('b'))
 
-        self.play_button_after = QtGui.QPushButton('Play signal after trimming')
+        self.play_button_after = QtGui.QPushButton(u'Odtwórz sygnał po przycięciu')
         self.play_button_after.clicked.connect(lambda: self.play('a'))
 
-        self.trim_button = QtGui.QPushButton('Trim')
+        self.trim_button = QtGui.QPushButton('Przytnij')
         self.trim_button.clicked.connect(lambda: self.trim_recording())
 
-        self.cancel_button = QtGui.QPushButton('Cancel all data')
+        self.cancel_button = QtGui.QPushButton(u'Wykasuj postępy')
         self.cancel_button.clicked.connect(lambda : self.cancel_recording())
-        self.cancel_button.setToolTip("Cancels current recorded data. Enables mode radiobuttons")
+        self.cancel_button.setToolTip(u"Kasuje nagrania tymczasowe. Odblokowuje wybór trybu przycinania")
 
-        self.apply_button = QtGui.QPushButton('Apply and save recording')
+        self.apply_button = QtGui.QPushButton('Akceptuj i zapisz nagranie')
         self.apply_button.clicked.connect(lambda : self.save_new_record())
         self.apply_button.setDefault(True)
 
         self.trim_options_group = QtGui.QButtonGroup(self)
-        self.trim_none = QtGui.QRadioButton("None")
-        self.trim_none.setToolTip("Recording will not be trimmed")
+        self.trim_none = QtGui.QRadioButton("Brak")
+        self.trim_none.setToolTip(u"Nagranie nie zostanie przycięte")
         self.trim_none.setChecked(True) #default option is no trim at all
-        self.trim_auto = QtGui.QRadioButton("Auto")
-        self.trim_auto.setToolTip("Application will try to trim automatically")
-        self.trim_manual = QtGui.QRadioButton("Manual")
-        self.trim_manual.setToolTip("Trim the recording by yourself")
+        self.trim_auto = QtGui.QRadioButton("Automatyczne")
+        self.trim_auto.setToolTip(u"Aplikacja spróbuje przyciąć automatycznie")
+        self.trim_manual = QtGui.QRadioButton("Manualne")
+        self.trim_manual.setToolTip(u"Przytnij nagranie ręcznie")
         self.trim_options_group.addButton(self.trim_none)
         self.trim_options_group.addButton(self.trim_auto)
         self.trim_options_group.addButton(self.trim_manual)
@@ -137,7 +139,7 @@ class RecordWindow(QtGui.QDialog):
         self.widget_layout.addWidget(self.apply_button, 0)
 
         self.setLayout(self.widget_layout)
-        self.setWindowTitle('Add new record')
+        self.setWindowTitle('Dodaj nowe nagranie')
         self.showMaximized()
         self.hide_canvas()
 
@@ -168,7 +170,7 @@ class RecordWindow(QtGui.QDialog):
         if self.is_data_valid():
             self.disable_elements(self.trim_radio_buttons, True)
 
-            self.message_user("Recording!") #NOT WORKING!
+            self.message_user("Nagrywanie!") #NOT WORKING!
             self.record_duration = int(self.record_duration_spin.value())
 
 
@@ -180,7 +182,7 @@ class RecordWindow(QtGui.QDialog):
             self.stream.close_stream()
 
             self.before.data = np.fromstring(b''.join(self.before.frames), dtype=np.int16)
-            self.message_user('Recording finished!')
+            self.message_user(u'Nagrywanie zakończone!')
             self.before.interval = self.interval_spin.value()
             self.before.replot(self.trim)
             if self.trim == 'a':
@@ -210,7 +212,7 @@ class RecordWindow(QtGui.QDialog):
             stream.open_stream("out")
             stream.play_recording(list(mode.frames)) #pass a COPY of list
         else:
-            self.message_user("Record your voice first!")
+            self.message_user(u"Najpierw nagraj swój głos!")
 
         self.play_button_after.setEnabled(True)
         self.play_button_before.setEnabled(True)
@@ -218,7 +220,7 @@ class RecordWindow(QtGui.QDialog):
 
     def trim_recording(self):
         if self.before.handles is None:
-            self.message_user('Not in manual mode or nothing to trim yet')
+            self.message_user(u'Brak nagrania do przycięcia')
         else:
             handles = self.before.handles
             xpos = []
@@ -229,35 +231,34 @@ class RecordWindow(QtGui.QDialog):
             self.after.data = trimmanual(np.copy(self.before.data), np.copy(self.before.timedata), tuple(xpos))
             self.after.data2frames()
             self.after.replot('n')
-            self.message_user('Trim successful')
+            self.message_user(u'Przycięcie zakończone sukcesem')
 
     def save_new_record(self):
         if self.record_name_edit.text() not in self.model.file_paths:
             self.record_name = self.record_name_edit.text()
-            if self.trim == 'n':
-                if self.before.data is not None:
-                    scipy.io.wavfile.write(RECS_DIR + "/" + self.record_name, f_sampling, self.before.data)
+            try:
+                if self.trim == 'n':
+                    if self.before.data is not None:
+                        scipy.io.wavfile.write(RECS_DIR + "/" + self.record_name, f_sampling, self.before.data)
+                    else:
+                        self.message_user(u"Najpierw nagraj swój głos")
+                        return
                 else:
-                    self.message_user("Record yourself first")
-                    return
-            else:
-                if self.after.data is not None:
-                    scipy.io.wavfile.write(RECS_DIR + "/" + self.record_name, f_sampling, self.after.data)
-                else:
-                    self.message_user("Record yourself or trim the recording")
-                    return
-            self.model.insertRows(self.record_name)
-            self.accept()
+                    if self.after.data is not None:
+                        scipy.io.wavfile.write(RECS_DIR + "/" + self.record_name, f_sampling, self.after.data)
+                    else:
+                        self.message_user(u"Nagraj swój głos lub przytnij tymczasowe nagranie")
+                        return
+                self.model.insertRows(self.record_name)
+                self.accept()
+            except UnicodeDecodeError:
+                self.message_user(u'Nazwa nagrania nie może zawierać polskich znaków')
         else:
-            self.message_user('Recording ' + self.record_name_edit.text() + ' already exists!')
+            self.message_user('Nagranie ' + self.record_name_edit.text() + u' już istnieje!')
 
     def is_data_valid(self):
-        if utils.is_valid_path(str(self.record_name_edit.text())):
-            if utils.is_number(self.record_duration_spin.value()):
-                return True
-            else:
-                self.message_user("Length must be a valid integer")
-                return False
+        if utils.is_valid_path(self.record_name_edit.text()):
+            return True
         else:
-            self.message_user("Name must be a valid filename")
+            self.message_user(u"Nazwa nie może zawierać znaków niedozwolonych w ścieżce systemowej")
             return False
