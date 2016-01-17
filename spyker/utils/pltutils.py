@@ -19,14 +19,16 @@ def plot_function(fig, data, clear=True):
     ax.set_xlabel(labels['xlabel'])
     ax.set_ylabel(labels['ylabel'])
 
-    if 'cursors' in data:
-        for x in data['cursors']:
-            ly = ax.axvline(color='r')
-            ly.set_xdata(x)
-
     if len(labels) == 2:
-        ax.plot(x_vector, y_vector, label=data['legend'])
+        current_plot, = ax.plot(x_vector, y_vector, label=data['legend'])
         ax.legend()
+        if 'cursors' in data:
+            for x in data['cursors']:
+                ly = ax.axvline(color=current_plot.get_color())
+                ly.set_xdata(x)
+                y_index = min(range(len(x_vector)), key=lambda i: abs(x_vector[i] - x))
+                ax.text(x, y_vector[y_index], int(x), style='italic',
+                        bbox={'facecolor': current_plot.get_color(), 'alpha': 0.5, 'pad': 10})
 
     elif len(labels) == 3:
         pax = ax.pcolormesh(y_vector)
@@ -51,8 +53,8 @@ def plot_function(fig, data, clear=True):
     if 'logarithmic' in data:
         ax.set_yscale('log')
 
-    fig.tight_layout()
-    # fig.savefig('samplefigure', bbox_inches='tight')
+        # fig.tight_layout()
+        # fig.savefig('samplefigure', bbox_inches='tight')
 
 
 def plt_single_line(fig, data, nr, x_or_y, main_plot_fig, is_3d):
