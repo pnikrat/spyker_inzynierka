@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import math
 
 import matplotlib
@@ -45,7 +47,7 @@ def stft(fs, data, frame_size=0.05, hop=0.025):
     ans = scipy.array([np.fft.rfft(w * data[i:i + frame_samp])
                        for i in range(0, len(data) - frame_samp, hop_samp)])
     ans = scipy.log10(scipy.absolute(ans.T))
-    labels = {'xlabel': 'Time [s]', 'ylabel': 'Frequency [Hz]', 'zlabel': 'Amplitude'}
+    labels = {'xlabel': 'Czas [s]', 'ylabel': u'Częstotliwość [Hz]', 'zlabel': 'Amplituda'}
 
     return {'y_vector': ans, 'x_vector': None, 'labels': labels, 'yticks': get_freqs_ticks(fs, len(data), len(ans)),
             'xticks': get_time_ticks(fs, len(data), len(ans.T))}
@@ -69,8 +71,9 @@ def formant_freqs(fs, data):
     freqs = [freq for freq in freqs if freq < max_freq]
     ans = ans[:len(freqs)]
 
-    labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Gain [dB]'}
+    labels = {'xlabel': u'Częstotliwość [Hz]', 'ylabel': 'Wzmocnienie [dB]'}
     return {'y_vector': ans, 'x_vector': freqs, 'labels': labels, 'cursors': formants}
+
 
 def fft(fs, data):
     max_freq = 5000
@@ -85,13 +88,13 @@ def fft(fs, data):
     freqs = [freq for freq in freqs if freq < max_freq]
     ans = ans[:len(freqs)]
 
-    labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Gain [dB]'}
+    labels = {'xlabel': u'Częstotliwość [Hz]', 'ylabel': 'Wzmocnienie [dB]'}
     return {'y_vector': ans, 'x_vector': freqs, 'labels': labels}
 
 
 def mfccoefs(fs, data, nwin=256, nfft=512, nceps=13):
     ceps, mspec, spec = mfcc(data, nwin, nfft, fs, nceps)
-    labels = {'xlabel': 'Coefficient number [-]', 'ylabel': 'Time [s]', 'zlabel': ''}
+    labels = {'xlabel': u'Numer współczynnika [-]', 'ylabel': 'Czas [s]', 'zlabel': ''}
     return {'y_vector': ceps, 'x_vector': None, 'labels': labels,
             'yticks': get_time_ticks(fs, len(data), len(ceps)),
             'xticks': get_unchanged_ticks(len(ceps.T))}
@@ -100,7 +103,7 @@ def mfccoefs(fs, data, nwin=256, nfft=512, nceps=13):
 def raw(fs, data):
     data = data.astype(float) / 32768.0
     time = np.linspace(0, float(len(data)) / fs, len(data))
-    labels = {'xlabel': 'Time [s]', 'ylabel': 'Amplitude [-]'}
+    labels = {'xlabel': 'Czas [s]', 'ylabel': 'Amplituda [-]'}
     return {'y_vector': data, 'x_vector': time, 'labels': labels}
 
 
@@ -114,15 +117,15 @@ def stft3d(fs, data):
 
     time, freqs = np.meshgrid(time, freqs, sparse=True)
 
-    labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Time [s]', 'zlabel': 'Amplitude [-]'}
+    labels = {'xlabel': u'Częstotliwość [Hz]', 'ylabel': 'Czas [s]', 'zlabel': 'Amplituda [-]'}
     return {'y_vector': spectrum, 'x_vector': time, 'z_vector': freqs, 'labels': labels,
             'yticks': get_freqs_ticks(fs, len(data), len(spectrum)),
             'xticks': get_time_ticks(fs, len(data), len(spectrum.T))}
 
 
 def psd(fs, data):
-    Pxx, freqs = matplotlib.mlab.psd(data, NFFT=256, Fs=2, detrend=matplotlib.mlab.detrend_none,
+    Pxx, freqs = matplotlib.mlab.psd(data, NFFT=256, Fs=44100, detrend=matplotlib.mlab.detrend_none,
                                      window=matplotlib.mlab.window_hanning, noverlap=0, pad_to=None,
                                      sides='default', scale_by_freq=None)
-    labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'power spectrum'}
+    labels = {'xlabel': u'Częstotliwość [Hz]', 'ylabel': ''}
     return {'y_vector': 20 * np.log10(Pxx), 'x_vector': freqs, 'labels': labels}

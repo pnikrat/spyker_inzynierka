@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
 
@@ -10,7 +12,7 @@ class EntryLayout(QtGui.QGridLayout):
         label = QtGui.QLabel(label_name)
         self.slider = QtGui.QSlider(QtCore.Qt.Horizontal)
         self.spinbox = QtGui.QDoubleSpinBox()
-        self.button = QtGui.QPushButton('Plot ' + str(label_name) + ' cut')
+        self.button = QtGui.QPushButton(u'Wykreśl przekrój w osi ' + str(label_name))
 
         edit_layout = QtGui.QGridLayout()
         edit_layout.addWidget(self.slider, 0, 0, 1, 2)

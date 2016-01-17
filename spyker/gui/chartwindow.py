@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import inspect
 
 import matplotlib.pyplot as plt
@@ -32,7 +34,7 @@ class ChartWindow(QtGui.QMainWindow):
         self.init_layout()
         self.init_plot()
         self.showMaximized()
-        self.setWindowTitle('Recording "' + str(self.file_name) + '" : ' + str(self.function_name))
+        self.setWindowTitle('Nagranie "' + str(self.file_name) + '" : ' + str(self.function_name))
 
     def init_layout(self):
         self.layout = QtGui.QHBoxLayout()
@@ -72,15 +74,15 @@ class ChartWindow(QtGui.QMainWindow):
         self.kwarg_edits = []
         self.add_kwarg_fields()
 
-        self.button = QtGui.QPushButton('Plot main recording')
+        self.button = QtGui.QPushButton(u'Wykreśl pierwotne przekształcenie')
         self.button.clicked.connect(lambda: self.replot(self.function(*self.get_args())))
         self.params_layout.addWidget(self.button)
 
         if is_two_d(self.function_name):
-            plot_next_layout = ComboLayout("Plot next: ", self.file_list_model, self.plot_next)
+            plot_next_layout = ComboLayout(u"Wykreśl kolejne nagranie: ", self.file_list_model, self.plot_next)
             self.params_layout.addLayout(plot_next_layout)
 
-        plot_difference_layout = ComboLayout("Plot difference: ", self.file_list_model, self.plot_difference)
+        plot_difference_layout = ComboLayout(u"Wykreśl różnicę: ", self.file_list_model, self.plot_difference)
         self.params_layout.addLayout(plot_difference_layout)
         self.controls_layout.addLayout(self.params_layout)
 
@@ -88,8 +90,8 @@ class ChartWindow(QtGui.QMainWindow):
         self.cursors_layout = QtGui.QVBoxLayout()
         self.cursors_layout.setAlignment(Qt.AlignTop)
 
-        self.x_cursor_layout = EntryLayout('x cursor')
-        self.y_cursor_layout = EntryLayout('y cursor')
+        self.x_cursor_layout = EntryLayout('x')
+        self.y_cursor_layout = EntryLayout('y')
 
         self.cursors_layout.addLayout(self.x_cursor_layout)
         self.cursors_layout.addLayout(self.y_cursor_layout)
@@ -229,7 +231,7 @@ class ComboLayout(QtGui.QHBoxLayout):
         combo = QtGui.QComboBox()
         combo.setModel(model)
 
-        button = QtGui.QPushButton("Plot")
+        button = QtGui.QPushButton(u"Wykreśl")
         button.clicked.connect(lambda: fun_to_call(combo.currentIndex()))
 
         self.addWidget(label)
