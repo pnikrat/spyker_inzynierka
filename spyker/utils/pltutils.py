@@ -88,17 +88,18 @@ def plt_single_line(fig, data, nr, x_or_y, main_plot_fig, is_3d):
             ax.plot(y_vector)
         ticks = data['xticks']
 
-    locs = ticks['locs']
-    labels = ticks['labels']
-    ax.set_xticks(locs)
-    ax.set_xticklabels(labels)
+    if not is_3d:
+        locs = ticks['locs']
+        labels = ticks['labels']
+        ax.set_xticks(locs)
+        ax.set_xticklabels(labels)
 
     fig.tight_layout()
 
 
 def plot_cursor(main_plot_fig, data, nr, x_or_y, is_3d):
     ax = main_plot_fig.axes[0]
-    if (is_3d):
+    if is_3d:
         plot_3d_cursor(ax, data, nr, x_or_y)
     else:
         plot_2d_cursor(ax, data, nr, x_or_y)
