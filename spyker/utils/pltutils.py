@@ -9,33 +9,47 @@ def plot_function(fig, data, clear=True):
     if clear:
         fig.clear()
 
-    x_vector = data['x_vector']
-    y_vector = data['y_vector']
-
     ax = fig.add_subplot(1, 1, 1)
 
     labels = data['labels']
+    apply_labels(ax, labels)
 
+    if len(labels) == 2:
+        draw_plot(ax, data)
+    elif len(labels) == 3:
+        draw_pcolormesh(fig, ax, data)
+
+    apply_ticks(ax, data)
+    apply_additional_features(fig, ax, data)
+
+
+def apply_labels(ax, labels):
     ax.set_xlabel(labels['xlabel'])
     ax.set_ylabel(labels['ylabel'])
 
-    if len(labels) == 2:
-        current_plot, = ax.plot(x_vector, y_vector, label=data['legend'])
-        ax.legend()
-        if 'cursors' in data:
-            for x in data['cursors']:
-                ly = ax.axvline(color=current_plot.get_color())
-                ly.set_xdata(x)
-                y_index = min(range(len(x_vector)), key=lambda i: abs(x_vector[i] - x))
-                ax.text(x, y_vector[y_index], int(x), style='italic',
-                        bbox={'facecolor': current_plot.get_color(), 'alpha': 0.5, 'pad': 10})
 
-    elif len(labels) == 3:
-        pax = ax.pcolormesh(y_vector)
-        cbar = fig.colorbar(pax)
-        cbar.ax.set_ylabel(labels['zlabel'])
-        ax.autoscale(enable=True, axis='both', tight=True)
+def draw_plot(ax, data):
+    x_vector = data['x_vector']
+    y_vector = data['y_vector']
+    current_plot, = ax.plot(x_vector, y_vector, label=data['legend'])
+    ax.legend()
+    if 'cursors' in data:
+        for x in data['cursors']:
+            ly = ax.axvline(color=current_plot.get_color())
+            ly.set_xdata(x)
+            y_index = min(range(len(x_vector)), key=lambda i: abs(x_vector[i] - x))
+            ax.text(x, y_vector[y_index], int(x), style='italic',
+                    bbox={'facecolor': current_plot.get_color(), 'alpha': 0.5, 'pad': 10})
 
+
+def draw_pcolormesh(fig, ax, data):
+    pax = ax.pcolormesh(data['y_vector'])
+    cbar = fig.colorbar(pax)
+    cbar.ax.set_ylabel(data['labels']['zlabel'])
+    ax.autoscale(enable=True, axis='both', tight=True)
+
+
+def apply_ticks(ax, data):
     if 'yticks' in data:
         yticks = data['yticks']
         ylocs = yticks['locs']
@@ -50,6 +64,8 @@ def plot_function(fig, data, clear=True):
         ax.set_xticks(xlocs)
         ax.set_xticklabels(xlabels)
 
+
+def apply_additional_features(fig, ax, data):
     if 'logarithmic' in data:
         ax.set_yscale('log')
 

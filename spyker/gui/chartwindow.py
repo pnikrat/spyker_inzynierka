@@ -82,9 +82,9 @@ class ChartWindow(QtGui.QMainWindow):
         if is_two_d(self.function_name):
             plot_next_layout = ComboLayout(u"Wykreśl kolejne nagranie: ", self.file_list_model, self.plot_next)
             self.params_layout.addLayout(plot_next_layout)
-
-        plot_difference_layout = ComboLayout(u"Wykreśl różnicę: ", self.file_list_model, self.plot_difference)
-        self.params_layout.addLayout(plot_difference_layout)
+        else:
+            plot_difference_layout = ComboLayout(u"Wykreśl różnicę: ", self.file_list_model, self.plot_difference)
+            self.params_layout.addLayout(plot_difference_layout)
         self.controls_layout.addLayout(self.params_layout)
 
     def init_cursors_layout(self):
