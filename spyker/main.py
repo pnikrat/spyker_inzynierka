@@ -2,10 +2,10 @@ import os
 import sys
 from collections import OrderedDict
 from dircache import listdir
+from os.path import isfile
 from os.path import join
 
 from PyQt4 import QtGui
-from os.path import isfile
 
 import spyker.model.charts as plots
 from spyker.gui.mainwindow import MainWindow

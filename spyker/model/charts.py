@@ -25,7 +25,7 @@ def get_freqs_ticks(fs, data_length, ans_length):
 
 def get_time_ticks(fs, data_length, ans_length):
     locs = np.arange(0, ans_length + 0.0001, float(ans_length) / NUMBER_OF_TICKS)
-    max_time = float(data_length / fs)
+    max_time = round(float(data_length) / fs, 1)
     labels = np.arange(0, max_time + 0.0001, float(max_time) / NUMBER_OF_TICKS)
     ticks = {'locs': locs, 'labels': labels}
     return ticks
@@ -73,7 +73,6 @@ def formant_freqs(fs, data):
     return {'y_vector': ans, 'x_vector': freqs, 'labels': labels, 'cursors': formants}
 
 
-
 def mfccoefs(fs, data, nwin=256, nfft=512, nceps=13):
     ceps, mspec, spec = mfcc(data, nwin, nfft, fs, nceps)
     labels = {'xlabel': 'Coefficient number [-]', 'ylabel': 'Time [s]', 'zlabel': ''}
@@ -87,7 +86,6 @@ def raw(fs, data):
     time = np.linspace(0, float(len(data)) / fs, len(data))
     labels = {'xlabel': 'Time [s]', 'ylabel': 'Amplitude [-]'}
     return {'y_vector': data, 'x_vector': time, 'labels': labels}
-
 
 
 def stft3d(fs, data):
@@ -111,4 +109,4 @@ def psd(fs, data):
                                      window=matplotlib.mlab.window_hanning, noverlap=0, pad_to=None,
                                      sides='default', scale_by_freq=None)
     labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'power spectrum'}
-    return {'y_vector': 20*np.log10(Pxx), 'x_vector': freqs, 'labels': labels}
+    return {'y_vector': 20 * np.log10(Pxx), 'x_vector': freqs, 'labels': labels}
