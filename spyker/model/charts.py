@@ -72,6 +72,22 @@ def formant_freqs(fs, data):
     labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Gain [dB]'}
     return {'y_vector': ans, 'x_vector': freqs, 'labels': labels, 'cursors': formants}
 
+def fft(fs, data):
+    max_freq = 5000
+
+    ncoeff = 2 + fs / 1000
+
+    a, e, k = lpc(data, ncoeff)
+    w, h = scipy.signal.freqz(1, a, worN=512)
+    freqs = fs * w / (2 * np.pi)
+    ans = 20 * np.log10(abs(h))
+
+    freqs = [freq for freq in freqs if freq < max_freq]
+    ans = ans[:len(freqs)]
+
+    labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Gain [dB]'}
+    return {'y_vector': ans, 'x_vector': freqs, 'labels': labels}
+
 
 def mfccoefs(fs, data, nwin=256, nfft=512, nceps=13):
     ceps, mspec, spec = mfcc(data, nwin, nfft, fs, nceps)
