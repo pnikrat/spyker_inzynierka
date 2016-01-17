@@ -60,31 +60,18 @@ def formant_freqs(fs, data):
     w, h = scipy.signal.freqz(1, a, worN=512)
     freqs = fs * w / (2 * np.pi)
     ans = 20 * np.log10(abs(h))
-
     rts = np.roots(a)
     rts = [r for r in rts if np.imag(r) >= 0]
     angs = np.arctan2(np.imag(rts), np.real(rts))
 
     formants = sorted(angs * (fs / (2 * math.pi)))
-    # formants = filter(lambda formant: formant != 0 and formant < max_freq, formants)
-    # freqs = [freq for freq in freqs if freq < max_freq]
-    # ans = ans[:len(freqs)]
+    formants = filter(lambda formant: formant != 0 and formant < max_freq, formants)
+    freqs = [freq for freq in freqs if freq < max_freq]
+    ans = ans[:len(freqs)]
 
     labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Gain [dB]'}
     return {'y_vector': ans, 'x_vector': freqs, 'labels': labels, 'cursors': formants}
 
-
-def fft2(fs, data, frame_size=0.05, hop=0.025):
-    frame_samp = int(frame_size * fs)
-    hop_samp = int(hop * fs)
-    w = scipy.hamming(frame_samp)
-
-    data = scipy.array([np.fft.rfft(w * data[i:i + frame_samp])
-                        for i in range(0, len(data) - frame_samp, hop_samp)])
-    data = scipy.absolute(data.T)
-    ans = [sum(i) / len(i) for i in data]
-    labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Amplitude [-]'}
-    return {'y_vector': ans, 'x_vector': range(0, len(ans)), 'labels': labels}
 
 
 def mfccoefs(fs, data, nwin=256, nfft=512, nceps=13):
@@ -97,39 +84,10 @@ def mfccoefs(fs, data, nwin=256, nfft=512, nceps=13):
 
 def raw(fs, data):
     data = data.astype(float) / 32768.0
-    # We then split the file into chunks, where the number of chunks depends on how finely you want to measure the volume:
-
-    # Finally, we compute the volume of each chunk:
-
-    # chunks = np.array_split(data, numchunks)
     time = np.linspace(0, float(len(data)) / fs, len(data))
-    # time = range(0, int(numchunks), 1)
-    # dbs = [20 * log10(sqrt(mean(chunk ** 2))) for chunk in chunks]
-
     labels = {'xlabel': 'Time [s]', 'ylabel': 'Amplitude [-]'}
     return {'y_vector': data, 'x_vector': time, 'labels': labels}
 
-
-def fft(fs, data):
-    time = np.linspace(0, float(len(data)) / fs, len(data))
-    window = scipy.signal.hamming(len(data), False)
-    data = data * window
-    compledata_array = np.fft.rfft(data)
-    module = ((compledata_array.real ** 2 + compledata_array.imag ** 2) ** 0.5) / len(data)
-    freq = np.fft.rfftfreq(time.shape[-1], 1.0 / fs)
-
-    # module = module[:(len(module) / 2)]
-    # freq = freq[:(len(freq) / 2)]
-    labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Amplitude [-]'}
-    return {'y_vector': module[:6000], 'x_vector': freq[:6000], 'labels': labels}
-
-
-def envelope(fs, data):
-    fftdict = fft2(fs, data)
-
-    env = abs(scipy.signal.hilbert(fftdict['y_vector']))
-    labels = {'xlabel': 'Time [s]', 'ylabel': 'Amplitude [-]'}
-    return {'y_vector': env[:1000], 'x_vector': fftdict['x_vector'][:1000], 'labels': labels}
 
 
 def stft3d(fs, data):
