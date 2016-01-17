@@ -12,6 +12,7 @@ from scipy.signal import lfilter
 
 NUMBER_OF_TICKS = 10
 
+
 def get_freqs_ticks(fs, data_length, ans_length):
     time = np.linspace(0, float(data_length) / fs, data_length)
     freq = np.fft.rfftfreq(time.shape[-1], 1.0 / fs)
@@ -40,7 +41,7 @@ def get_unchanged_ticks(ans_lenght):
 def stft(fs, data, frame_size=0.05, hop=0.025):
     frame_samp = int(frame_size * fs)
     hop_samp = int(hop * fs)
-    w = scipy.hanning(frame_samp)
+    w = scipy.hamming(frame_samp)
     ans = scipy.array([np.fft.rfft(w * data[i:i + frame_samp])
                        for i in range(0, len(data) - frame_samp, hop_samp)])
     ans = scipy.log10(scipy.absolute(ans.T))
@@ -50,24 +51,40 @@ def stft(fs, data, frame_size=0.05, hop=0.025):
             'xticks': get_time_ticks(fs, len(data), len(ans.T))}
 
 
+def formant_freqs(fs, data):
+    max_freq = 5000
+
+    ncoeff = 2 + fs / 1000
+
+    a, e, k = lpc(data, ncoeff)
+    w, h = scipy.signal.freqz(1, a, worN=512)
+    freqs = fs * w / (2 * np.pi)
+    ans = 20 * np.log10(abs(h))
+
+    rts = np.roots(a)
+    rts = [r for r in rts if np.imag(r) >= 0]
+    angs = np.arctan2(np.imag(rts), np.real(rts))
+
+    formants = sorted(angs * (fs / (2 * math.pi)))
+    # formants = filter(lambda formant: formant != 0 and formant < max_freq, formants)
+    # freqs = [freq for freq in freqs if freq < max_freq]
+    # ans = ans[:len(freqs)]
+
+    labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Gain [dB]'}
+    return {'y_vector': ans, 'x_vector': freqs, 'labels': labels, 'cursors': formants}
+
+
 def fft2(fs, data, frame_size=0.05, hop=0.025):
-    # time = np.linspace(0, float(len(data)) / fs, len(data))
-    # freq = np.fft.rfftfreq(time.shape[-1], 1.0 / fs)
     frame_samp = int(frame_size * fs)
     hop_samp = int(hop * fs)
-    w = scipy.hanning(frame_samp)
+    w = scipy.hamming(frame_samp)
 
-    ans = scipy.array([np.fft.rfft(w * data[i:i + frame_samp])
-                       for i in range(0, len(data) - frame_samp, hop_samp)])
-    # ans.shape -> (39, 1103) czyli wiersze to numery kolejnych ramek, a kolumny to wynik rfft ?
-    ans = scipy.absolute(ans.T)
-    ans = [sum(i) / len(i) for i in ans]
-    xrng = len(ans)
-    ans = scipy.array(ans)  # zmiana z listy na numpy array bo w pltutils pracuje na typie numpy array
+    data = scipy.array([np.fft.rfft(w * data[i:i + frame_samp])
+                        for i in range(0, len(data) - frame_samp, hop_samp)])
+    data = scipy.absolute(data.T)
+    ans = [sum(i) / len(i) for i in data]
     labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'Amplitude [-]'}
-    # return {'y_vector': ans, 'x_vector': freq[:len(ans)], 'labels': labels, 'logarithmic': True}
-    return {'y_vector': ans, 'x_vector': range(0, xrng), 'labels': labels,
-            'xticks': get_freqs_ticks(fs, len(data), xrng), 'logarithmic': True}
+    return {'y_vector': ans, 'x_vector': range(0, len(ans)), 'labels': labels}
 
 
 def mfccoefs(fs, data, nwin=256, nfft=512, nceps=13):
@@ -95,7 +112,7 @@ def raw(fs, data):
 
 def fft(fs, data):
     time = np.linspace(0, float(len(data)) / fs, len(data))
-    window = scipy.signal.hanning(len(data), False)
+    window = scipy.signal.hamming(len(data), False)
     data = data * window
     compledata_array = np.fft.rfft(data)
     module = ((compledata_array.real ** 2 + compledata_array.imag ** 2) ** 0.5) / len(data)
@@ -113,35 +130,6 @@ def envelope(fs, data):
     env = abs(scipy.signal.hilbert(fftdict['y_vector']))
     labels = {'xlabel': 'Time [s]', 'ylabel': 'Amplitude [-]'}
     return {'y_vector': env[:1000], 'x_vector': fftdict['x_vector'][:1000], 'labels': labels}
-
-
-def formant_freqs_on_fft(fs, data):
-    return dict(fft(fs, data).items() + {'cursors': formant_freqs(fs, data)}.items())
-
-    # na usrednionym widmie gestosci mocy
-
-
-def formant_freqs(fs, data):
-    N = len(data)
-    w = np.hanning(N)
-
-    # Apply window and high pass filter.
-    x1 = data * w
-    x1 = lfilter([1], [1., 0.63], x1)
-
-    ncoeff = 2 + fs / 1000
-    A, e, k = lpc(x1, ncoeff)
-
-    # Get roots.
-    rts = np.roots(A)
-    rts = [r for r in rts if np.imag(r) >= 0]
-
-    # Get angles.
-    angs = np.arctan2(np.imag(rts), np.real(rts))
-
-    # Get frequencies.
-    frqs = sorted(angs * (fs / (2 * math.pi)))
-    return frqs[:5]
 
 
 def stft3d(fs, data):
@@ -165,4 +153,4 @@ def psd(fs, data):
                                      window=matplotlib.mlab.window_hanning, noverlap=0, pad_to=None,
                                      sides='default', scale_by_freq=None)
     labels = {'xlabel': 'Frequency [Hz]', 'ylabel': 'power spectrum'}
-    return {'y_vector': Pxx, 'x_vector': freqs, 'labels': labels}
+    return {'y_vector': 20*np.log10(Pxx), 'x_vector': freqs, 'labels': labels}

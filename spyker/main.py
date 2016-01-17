@@ -22,7 +22,7 @@ if __name__ == '__main__':
                               ChartType.FFT2: plots.fft2,
                               ChartType.MFCC: plots.mfccoefs,
                               ChartType.STFT: plots.stft,
-                              ChartType.FORMANTS: plots.formant_freqs_on_fft,
+                              ChartType.FORMANTS: plots.formant_freqs,
                               ChartType.STFT3D: plots.stft3d})
 
     chart_list_model = ChartListModel(chart_dict)
