@@ -90,6 +90,7 @@ class TrimCanvas(QtGui.QWidget):
             self.handles = plot_trimmable(self.figure, data)
         else:
             data['legend'] = None
+            data['tight'] = True
             self.handles = plot_function(self.figure, data)
         self.canvas.draw()
 

@@ -17,6 +17,7 @@ if __name__ == '__main__':
 
     chart_dict = OrderedDict({ChartType.RAW: plots.raw,
                               ChartType.PSD: plots.psd,
+                              ChartType.FFT: plots.fft,
                               ChartType.MFCC: plots.mfccoefs,
                               ChartType.STFT: plots.stft,
                               ChartType.FORMANTS: plots.formant_freqs,

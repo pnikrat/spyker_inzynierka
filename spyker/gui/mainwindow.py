@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import os
 
 import pyaudio
@@ -25,15 +28,15 @@ class FileGrid(QtGui.QGridLayout):
 
         add_button = FileButton("+", "#35ae56")
         add_button.clicked.connect(self.start_new_record_window)
-        add_button.setToolTip("Add new recording")
+        add_button.setToolTip("Dodaj nowe nagranie")
 
         remove_button = FileButton("-", "#d05d4f")
         remove_button.clicked.connect(self.confirm_deletion)
-        remove_button.setToolTip("Delete selected recording")
+        remove_button.setToolTip(u"Usuń wybrane nagranie")
 
         play_button = FileButton("", "#35ae56", "icons/play.png")
         play_button.clicked.connect(lambda: self.play_recording())
-        play_button.setToolTip("Play selected recording")
+        play_button.setToolTip(u"Odtwórz wybrane nagranie")
 
         self.addWidget(file_grid_label, 0, 0, 1, 2)
         self.addWidget(self.list_view, 1, 0, 30, 1)
@@ -48,7 +51,7 @@ class FileGrid(QtGui.QGridLayout):
         self.new_record_window.exec_()
 
     def confirm_deletion(self):
-        dialog_window = DialogWindow(self.model, 'Are you sure you want to delete this recording?')
+        dialog_window = DialogWindow(self.model, 'Czy jesteś pewien?')
         if dialog_window.exec_():
             if dialog_window.result:
                 file_name = self.list_view.currentIndex().data().toString()
@@ -89,9 +92,9 @@ class PlotGrid(QtGui.QGridLayout):
         self.current_recording = None
         self.setColumnMinimumWidth(1, 200)
 
-        self.file_label = QtGui.QLabel('Current file is: None')
+        self.file_label = QtGui.QLabel(u'Nagranie: ')
 
-        self.chart_label = QtGui.QLabel('Current chart is: None')
+        self.chart_label = QtGui.QLabel(u'Przekształcenie: ')
 
         self.plot_button = QtGui.QPushButton('Plot')
         self.plot_button.clicked.connect(self.button_clicked)
@@ -108,15 +111,15 @@ class PlotGrid(QtGui.QGridLayout):
                                        self.file_model)
             chart_window.show()
         except TypeError:
-            self.chart_label.setText("Choose chart type and file first!")
+            self.chart_label.setText(u"Wybierz plik\noraz rodzaj przekształcenia!")
 
     def labels_change(self):
         self.current_recording = self.file_model.data(self.file_view.currentIndex(), QtCore.Qt.DisplayRole)
-        self.file_label.setText('Current file is: %s' % self.current_recording)
+        self.file_label.setText(u'Nagranie:  %s' % self.current_recording)
 
         self.current_chart_key, self.current_chart_value = self.chart_model.data(self.chart_view.currentIndex(),
                                                                                  QtCore.Qt.UserRole)
-        self.chart_label.setText('Current chart is: %s' % self.current_chart_key)
+        self.chart_label.setText(u'Przekształcenie: %s' % self.current_chart_key)
 
 
 class MainWindow(QtGui.QWidget):

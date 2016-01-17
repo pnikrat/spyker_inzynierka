@@ -53,8 +53,8 @@ def plot_function(fig, data, clear=True):
     if 'logarithmic' in data:
         ax.set_yscale('log')
 
-        # fig.tight_layout()
-        # fig.savefig('samplefigure', bbox_inches='tight')
+    if 'tight' in data and data['tight'] is True:
+        fig.tight_layout()
 
 
 def plt_single_line(fig, data, nr, x_or_y, main_plot_fig, is_3d):
@@ -94,7 +94,6 @@ def plt_single_line(fig, data, nr, x_or_y, main_plot_fig, is_3d):
     ax.set_xticklabels(labels)
 
     fig.tight_layout()
-    # fig.savefig('samplefigure', bbox_inches='tight')
 
 
 def plot_cursor(main_plot_fig, data, nr, x_or_y, is_3d):
@@ -153,7 +152,6 @@ def plot_3d(fig, data):
 
     fig.colorbar(surf)
     fig.tight_layout()
-    # fig.savefig('samplefigure', bbox_inches='tight')
 
 
 def plot_trimmable(fig, data):
