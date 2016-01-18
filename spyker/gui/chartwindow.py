@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import inspect
+
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.io.wavfile
@@ -10,12 +12,12 @@ from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QHBoxLayout
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
-import matplotlib
 
 from spyker.gui.entrylayout import EntryLayout
 from spyker.utils.constants import RECS_DIR, ChartType
-from spyker.utils.pltutils import plt_single_line, plot_function, plot_3d, plot_3d_cursor, plot_cursor
+from spyker.utils.pltutils import plt_single_line, plot_function, plot_3d, plot_cursor
 from spyker.utils.utils import get_kwargs
+
 matplotlib.rc('font', family='DejaVu Sans') # polskie znaki w matplotlib
 
 

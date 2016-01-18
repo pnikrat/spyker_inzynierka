@@ -11,15 +11,15 @@ from scikits.talkbox import lpc
 from scikits.talkbox.features import mfcc
 from scipy.signal import lfilter
 
-
 NUMBER_OF_TICKS = 10
 
 
-def get_freqs_ticks(fs, data_length, ans_length):
+def get_freqs_ticks(fs, data_length, ans_length, max_freq=None):
     time = np.linspace(0, float(data_length) / fs, data_length)
     freq = np.fft.rfftfreq(time.shape[-1], 1.0 / fs)
     locs = np.arange(0, ans_length + 0.0001, float(ans_length) / NUMBER_OF_TICKS)
-    max_freq = int(freq[-1])
+    if max_freq is None:
+        max_freq = int(freq[-1])
     labels = np.arange(0, max_freq + 0.0001, float(max_freq) / NUMBER_OF_TICKS).astype(np.int, copy=False)
     ticks = {'locs': locs, 'labels': labels}
     return ticks
@@ -110,8 +110,11 @@ def raw(fs, data):
 def stft3d(fs, data):
     (spectrum, freqs, t) = specgram(data, Fs=fs, NFFT=512, sides='onesided', mode='magnitude')
     spectrum = spectrum / len(data)
-    freqs = freqs[:58]
-    spectrum = spectrum[:58, :]
+
+    max_freq = 5000
+    max_freq_index = next(i for i, v in enumerate(freqs) if v > max_freq)
+    freqs = freqs[:max_freq_index]
+    spectrum = spectrum[:max_freq_index, :]
     dimR, dimC = spectrum.shape
     time = np.linspace(0, float(len(data)) / fs, dimC)
 
@@ -119,7 +122,7 @@ def stft3d(fs, data):
 
     labels = {'xlabel': u'Częstotliwość [Hz]', 'ylabel': 'Czas [s]', 'zlabel': 'Amplituda [-]'}
     return {'y_vector': spectrum, 'x_vector': time, 'z_vector': freqs, 'labels': labels,
-            'yticks': get_freqs_ticks(fs, len(data), len(spectrum)),
+            'yticks': get_freqs_ticks(fs, len(data), len(spectrum), freqs[-1]),
             'xticks': get_time_ticks(fs, len(data), len(spectrum.T))}
 
 
