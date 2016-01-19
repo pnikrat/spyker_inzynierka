@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import math
+
 import matplotlib
 import numpy as np
 import scipy
@@ -70,7 +71,6 @@ def formant_freqs(fs, data):
     formants = filter(lambda formant: formant != 0 and formant < max_freq, formants)
     freqs = [freq for freq in freqs if freq < max_freq]
     ans = ans[:len(freqs)]
-
     labels = {'xlabel': u'Częstotliwość [Hz]', 'ylabel': 'Wzmocnienie [dB]'}
     return {'y_vector': ans, 'x_vector': freqs, 'labels': labels, 'cursors': formants}
 

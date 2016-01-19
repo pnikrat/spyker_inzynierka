@@ -18,7 +18,7 @@ from spyker.utils.constants import RECS_DIR, ChartType
 from spyker.utils.pltutils import plt_single_line, plot_function, plot_3d, plot_cursor
 from spyker.utils.utils import get_kwargs
 
-matplotlib.rc('font', family='DejaVu Sans') # polskie znaki w matplotlib
+matplotlib.rc('font', family='DejaVu Sans')  # polskie znaki w matplotlib
 
 
 class ChartWindow(QtGui.QMainWindow):
@@ -138,17 +138,19 @@ class ChartWindow(QtGui.QMainWindow):
             self.plot_sliders()
 
     def replot(self, data_to_plot):
+
         if 'z_vector' in data_to_plot:
             plot_3d(self.fig, data_to_plot)
         else:
             data_to_plot['legend'] = self.file_name
             plot_function(self.fig, data_to_plot)
 
+        self.plotted_data = data_to_plot
+
         if hasattr(self, 'x_cursor_layout'):
             self.plot_sliders()
 
         self.canvas.draw()
-        self.plotted_data = data_to_plot
 
     def get_args(self):
         args = [self.fs, self.data] + self.get_kwargs()
@@ -195,10 +197,12 @@ class ChartWindow(QtGui.QMainWindow):
         x_slider_max = len(self.plotted_data['y_vector'][0]) - 1
         x_real_max = self.plotted_data['xticks']['labels'][-1]
         self.x_cursor_layout.set_maximum(x_slider_max, x_real_max)
+        self.x_cursor_layout.reset()
 
         y_slider_max = len(self.plotted_data['y_vector']) - 1
         y_real_max = self.plotted_data['yticks']['labels'][-1]
         self.y_cursor_layout.set_maximum(y_slider_max, y_real_max)
+        self.y_cursor_layout.reset()
 
     def add_kwarg_fields(self):
         if inspect.getargspec(self.function).defaults is not None:

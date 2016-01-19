@@ -36,6 +36,10 @@ class EntryLayout(QtGui.QGridLayout):
         self.step = float(spinbox_max) / slider_max
         self.spinbox.setSingleStep(self.step)
 
+    def reset(self):
+        self.slider.setValue(0)
+        self.spinbox.setValue(0)
+
     def slider_value_changed(self, value):
         if self.should_update:
             self.should_update = False
