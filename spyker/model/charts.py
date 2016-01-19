@@ -108,7 +108,7 @@ def raw(fs, data):
 
 
 def stft3d(fs, data):
-    (spectrum, freqs, t) = specgram(data, Fs=fs, NFFT=512, sides='onesided', mode='magnitude')
+    (spectrum, freqs, t) = specgram(data, Fs=fs, NFFT=512, sides='onesided', mode='magnitude', noverlap=256)
     spectrum = spectrum / len(data)
 
     max_freq = 5000
@@ -127,8 +127,8 @@ def stft3d(fs, data):
 
 
 def psd(fs, data):
-    Pxx, freqs = matplotlib.mlab.psd(data, NFFT=256, Fs=44100, detrend=matplotlib.mlab.detrend_none,
-                                     window=matplotlib.mlab.window_hanning, noverlap=0, pad_to=None,
+    Pxx, freqs = matplotlib.mlab.psd(data, NFFT=512, Fs=44100, detrend=matplotlib.mlab.detrend_none,
+                                     window=matplotlib.mlab.window_hanning, noverlap=256, pad_to=None,
                                      sides='default', scale_by_freq=None)
     labels = {'xlabel': u'Częstotliwość [Hz]', 'ylabel': ''}
     return {'y_vector': 20 * np.log10(Pxx), 'x_vector': freqs, 'labels': labels}
