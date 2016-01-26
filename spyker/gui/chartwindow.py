@@ -159,7 +159,7 @@ class ChartWindow(QtGui.QMainWindow):
     def get_kwargs(self):
         kwargs = []
         for kwarg_edit in self.kwarg_edits:
-            kwargs.append(float(kwarg_edit.text()))
+            kwargs.append(float(kwarg_edit.value()))
         return kwargs
 
     def plot_next(self, index):
@@ -211,8 +211,20 @@ class ChartWindow(QtGui.QMainWindow):
 
                 edit_layout.setColumnStretch(0, 1)
                 edit_layout.setColumnStretch(1, 2)
-                label = QtGui.QLabel(k)
-                kwarg_edit = QtGui.QLineEdit(str(v))
+
+                param = PARAMS.get(k)
+                label = QtGui.QLabel(param.get('name'))
+
+                if self.function_name is ChartType.MFCC:
+                    kwarg_edit = QtGui.QSpinBox()
+                elif self.function_name is ChartType.STFT:
+                    kwarg_edit = QtGui.QDoubleSpinBox()
+                    kwarg_edit.setDecimals(3)
+
+                kwarg_edit.setMinimum(param.get('min'))
+                kwarg_edit.setMaximum(param.get('max'))
+
+                kwarg_edit.setValue(v)
                 edit_layout.addWidget(label, 0, 0)
                 edit_layout.addWidget(kwarg_edit, 0, 1)
                 self.kwarg_edits.append(kwarg_edit)
@@ -244,3 +256,10 @@ class ComboLayout(QtGui.QHBoxLayout):
         self.addWidget(label)
         self.addWidget(combo)
         self.addWidget(button)
+
+
+PARAMS = {'nwin': {'name': u'długość okna', 'min': 256, 'max': 8192},
+          'nfft': {'name': u'długość transformaty', 'min': 256, 'max': 8192},
+          'nceps': {'name': u'ilość współczynników', 'min': 2, 'max': 40},
+          'frame_size': {'name': u'czas ramki', 'min': 0.0001, 'max': 0.5},
+          'hop': {'name': u'czas przeskoku', 'min': 0.0001, 'max': 0.5}}

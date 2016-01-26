@@ -34,9 +34,9 @@ def get_time_ticks(fs, data_length, ans_length):
     return ticks
 
 
-def get_unchanged_ticks(ans_lenght):
-    locs = np.arange(0, ans_lenght)
-    labels = np.arange(0, ans_lenght)
+def get_unchanged_ticks(ans_length):
+    locs = np.arange(0, ans_length)
+    labels = np.arange(0, ans_length)
     ticks = {'locs': locs, 'labels': labels}
     return ticks
 
