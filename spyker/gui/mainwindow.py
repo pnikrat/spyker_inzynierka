@@ -106,12 +106,12 @@ class PlotGrid(QtGui.QGridLayout):
         self.addWidget(self.plot_button, 2, 0, 1, 2)
 
     def button_clicked(self):
-        try:
+        # try:
             chart_window = ChartWindow(self.current_chart_value, self.current_recording, self.current_chart_key,
                                        self.file_model)
             chart_window.show()
-        except TypeError:
-            self.chart_label.setText(u"Wybierz plik\noraz rodzaj przekształcenia!")
+        # except TypeError:
+        #     self.chart_label.setText(u"Wybierz plik\noraz rodzaj przekształcenia!")
 
     def labels_change(self):
         self.current_recording = self.file_model.data(self.file_view.currentIndex(), QtCore.Qt.DisplayRole)
