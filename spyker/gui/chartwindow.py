@@ -18,7 +18,7 @@ from spyker.utils.constants import RECS_DIR, ChartType
 from spyker.utils.pltutils import plt_single_line, plot_function, plot_3d, plot_cursor
 from spyker.utils.utils import get_kwargs
 
-matplotlib.rc('font', family='DejaVu Sans')  # polskie znaki w matplotlib
+matplotlib.rc('font', family='Arial')  # polskie znaki w matplotlib
 
 
 class ChartWindow(QtGui.QMainWindow):
