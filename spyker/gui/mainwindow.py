@@ -177,4 +177,4 @@ class MainWindow(QtGui.QWidget):
         hbox.addWidget(splitter2)
         self.setLayout(hbox)
         self.setGeometry(200, 200, 700, 250)
-        self.setWindowTitle('Nazwa aplikacji')
+        self.setWindowTitle('Feature Extraction & Visualisation')
