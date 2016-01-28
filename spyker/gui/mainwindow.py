@@ -47,8 +47,8 @@ class FileGrid(QtGui.QGridLayout):
         self.setRowStretch(1, 10)
 
     def start_new_record_window(self):
-        new_record_window = RecordWindow(self.model)
-        new_record_window.exec_()
+        self.new_record_window = RecordWindow(self.model)
+        self.new_record_window.exec_()
 
     def confirm_deletion(self):
         if len(self.model.file_paths) == 0:

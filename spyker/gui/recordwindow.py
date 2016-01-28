@@ -238,17 +238,17 @@ class RecordWindow(QtGui.QDialog):
             try:
                 if self.trim == 'n':
                     if self.before.data is not None:
-                        scipy.io.wavfile.write(RECS_DIR + "/" + self.record_name, f_sampling, self.before.data)
+                        scipy.io.wavfile.write(RECS_DIR + "/" + self.record_name + ".wav", f_sampling, self.before.data)
                     else:
                         self.message_user(u"Najpierw nagraj swój głos")
                         return
                 else:
                     if self.after.data is not None:
-                        scipy.io.wavfile.write(RECS_DIR + "/" + self.record_name, f_sampling, self.after.data)
+                        scipy.io.wavfile.write(RECS_DIR + "/" + self.record_name + ".wav", f_sampling, self.after.data)
                     else:
                         self.message_user(u"Nagraj swój głos lub przytnij tymczasowe nagranie")
                         return
-                self.model.insertRows(self.record_name)
+                self.model.insertRows(self.record_name + ".wav")
                 self.accept()
             except UnicodeDecodeError:
                 self.message_user(u'Nazwa nagrania nie może zawierać polskich znaków')

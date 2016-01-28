@@ -85,11 +85,11 @@ class TrimCanvas(QtGui.QWidget):
     def replot(self, mode):
         data = plots.raw(f_sampling, self.data)
         self.timedata = data['x_vector']
+        data['legend'] = 'Tymczasowe nagranie'
         if mode == 'm':
             data['sliders'] = (self.timedata[-1]*0.1, self.timedata[-1]*0.1 + self.interval, self.interval)
             self.handles = plot_trimmable(self.figure, data)
         else:
-            data['legend'] = None
             data['tight'] = True
             self.handles = plot_function(self.figure, data)
         self.canvas.draw()

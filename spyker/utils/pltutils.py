@@ -184,7 +184,7 @@ def plot_trimmable(fig, data):
     ax.set_xlabel(labels.get('xlabel'))
     ax.set_ylabel(labels.get('ylabel'))
 
-    ax.plot(x_vector, y_vector)
+    ax.plot(x_vector, y_vector, label=data['legend'])
     slider1XPos, slider2XPos, interval = data['sliders']
     leftline = ax.axvline(x=slider1XPos, color='r', linewidth=1)
     rightline = ax.axvline(x=slider2XPos, color='r', linewidth=1)
