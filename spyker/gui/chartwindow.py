@@ -27,6 +27,7 @@ class ChartWindow(QtGui.QMainWindow):
         self.function = function
         self.function_name = function_name
         self.file_name = file_name
+        self.files_on_chart = [self.file_name]
         self.file_list_model = file_list_model
         self.fs, self.data = scipy.io.wavfile.read(RECS_DIR + '/' + self.file_name)
 
@@ -151,6 +152,7 @@ class ChartWindow(QtGui.QMainWindow):
             self.plot_sliders()
 
         self.canvas.draw()
+        self.files_on_chart = [self.file_name]
 
     def get_args(self):
         args = [self.fs, self.data] + self.get_kwargs()
@@ -164,14 +166,19 @@ class ChartWindow(QtGui.QMainWindow):
 
     def plot_next(self, index):
         additional_recording = self.file_list_model.file_paths[index]
+        if additional_recording in self.files_on_chart:
+            return
         fs, data = scipy.io.wavfile.read(RECS_DIR + "/" + additional_recording)
         plot_data = self.function(fs, data)
         plot_data['legend'] = additional_recording
         plot_function(self.fig, plot_data, clear=False)
         self.canvas.draw()
+        self.files_on_chart.append(additional_recording)
 
     def plot_difference(self, index):
         recording_to_subtract = self.file_list_model.file_paths[index]
+        if recording_to_subtract in self.files_on_chart:
+            return
         file_to_subtract_fs, file_to_subtract_data = scipy.io.wavfile.read(RECS_DIR + '/' + recording_to_subtract)
 
         data_copy = np.ndarray.copy(self.data)
@@ -246,7 +253,6 @@ class ComboLayout(QtGui.QHBoxLayout):
         QHBoxLayout.__init__(self)
 
         label = QtGui.QLabel(name)
-
         combo = QtGui.QComboBox()
         combo.setModel(model)
 
