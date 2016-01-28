@@ -27,10 +27,12 @@ if __name__ == '__main__':
 
     file_list_model = FileListModel()
 
-    if os.path.exists(RECS_DIR):
+    if os.path.isdir(RECS_DIR): # directory present
         for f in listdir(RECS_DIR):
             if isfile(join(RECS_DIR, f)):
                 file_list_model.insertRows(f)
+    else: # no directory
+        os.mkdir(RECS_DIR)
 
     app = QtGui.QApplication(sys.argv)
     app_icon = QtGui.QIcon()

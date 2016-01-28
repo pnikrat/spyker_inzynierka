@@ -8,7 +8,7 @@ from PyQt4 import QtGui, QtCore
 
 from spyker.gui.chartlistview import ChartListView
 from spyker.gui.chartwindow import ChartWindow
-from spyker.gui.dialogwindow import DialogWindow
+from spyker.gui.dialogwindow import DialogWindow, OkWindow
 from spyker.gui.filebutton import FileButton
 from spyker.gui.filelistview import FileListView
 from spyker.gui.recordwindow import RecordWindow
@@ -47,10 +47,14 @@ class FileGrid(QtGui.QGridLayout):
         self.setRowStretch(1, 10)
 
     def start_new_record_window(self):
-        self.new_record_window = RecordWindow(self.model)
-        self.new_record_window.exec_()
+        new_record_window = RecordWindow(self.model)
+        new_record_window.exec_()
 
     def confirm_deletion(self):
+        if len(self.model.file_paths) == 0:
+            ok_window = OkWindow(u'W katalogu nie ma plików do usunięcia')
+            ok_window.exec_()
+            return
         dialog_window = DialogWindow(self.model, u'Czy jesteś pewien?')
         if dialog_window.exec_():
             if dialog_window.result:
@@ -59,6 +63,10 @@ class FileGrid(QtGui.QGridLayout):
                 os.remove(RECS_DIR + "/" + str(file_name))
 
     def play_recording(self):
+        if len(self.model.file_paths) == 0:
+            ok_window = OkWindow(u'W katalogu nie ma plików do odtworzenia')
+            ok_window.exec_()
+            return
         current_recording = self.model.data(self.list_view.currentIndex(), QtCore.Qt.DisplayRole)
         stream = SoundStream(1024, pyaudio.paInt16, 1, f_sampling)
         stream.open_stream("out")
@@ -106,20 +114,28 @@ class PlotGrid(QtGui.QGridLayout):
         self.addWidget(self.plot_button, 2, 0, 1, 2)
 
     def button_clicked(self):
-        # try:
-            chart_window = ChartWindow(self.current_chart_value, self.current_recording, self.current_chart_key,
-                                       self.file_model)
-            chart_window.show()
+        if self.current_chart_value is None or self.current_recording is None:
+            self.chart_label.setText(u"Wybierz plik\noraz rodzaj przekształcenia!")
+        else:
+            try:
+                chart_window = ChartWindow(self.current_chart_value, self.current_recording, self.current_chart_key,
+                                           self.file_model)
+                chart_window.show()
+            except IOError:
+                self.chart_label.setText(u"Wybierz plik\noraz rodzaj przekształcenia!")
         # except TypeError:
         #     self.chart_label.setText(u"Wybierz plik\noraz rodzaj przekształcenia!")
 
     def labels_change(self):
-        self.current_recording = self.file_model.data(self.file_view.currentIndex(), QtCore.Qt.DisplayRole)
-        self.file_label.setText(u'Nagranie:  %s' % unicode(self.current_recording))
+        try:
+            self.current_recording = self.file_model.data(self.file_view.currentIndex(), QtCore.Qt.DisplayRole)
+            self.file_label.setText(u'Nagranie:  %s' % unicode(self.current_recording))
 
-        self.current_chart_key, self.current_chart_value = self.chart_model.data(self.chart_view.currentIndex(),
-                                                                                 QtCore.Qt.UserRole)
-        self.chart_label.setText(u'Przekształcenie: %s' % unicode(self.current_chart_key))
+            self.current_chart_key, self.current_chart_value = self.chart_model.data(self.chart_view.currentIndex(),
+                                                                                     QtCore.Qt.UserRole)
+            self.chart_label.setText(u'Przekształcenie: %s' % unicode(self.current_chart_key))
+        except IndexError:
+            self.file_label.setText(u'Brak nagrań!')
 
 
 class MainWindow(QtGui.QWidget):

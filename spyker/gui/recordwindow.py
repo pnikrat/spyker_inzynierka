@@ -173,7 +173,6 @@ class RecordWindow(QtGui.QDialog):
             self.message_user("Nagrywanie!") #NOT WORKING!
             self.record_duration = int(self.record_duration_spin.value())
 
-
             self.stream = SoundStream(1024, pyaudio.paInt16, 1, f_sampling)
             self.stream.open_stream("in")
             self.stream.record(self.record_duration)
