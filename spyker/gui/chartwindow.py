@@ -264,8 +264,8 @@ class ComboLayout(QtGui.QHBoxLayout):
         self.addWidget(button)
 
 
-PARAMS = {'nwin': {'name': u'długość okna', 'min': 256, 'max': 8192},
-          'nfft': {'name': u'długość transformaty', 'min': 256, 'max': 8192},
-          'nceps': {'name': u'ilość współczynników', 'min': 2, 'max': 40},
-          'frame_size': {'name': u'czas ramki', 'min': 0.0001, 'max': 0.5},
-          'hop': {'name': u'czas przeskoku', 'min': 0.0001, 'max': 0.5}}
+PARAMS = {'nwin': {'name': u'Długość okna', 'min': 256, 'max': 8192},
+          'nfft': {'name': u'Długość transformaty', 'min': 256, 'max': 8192},
+          'nceps': {'name': u'Ilość współczynników', 'min': 2, 'max': 40},
+          'frame_size': {'name': u'Czas ramki', 'min': 0.0001, 'max': 0.5},
+          'hop': {'name': u'Czas przeskoku', 'min': 0.0001, 'max': 0.5}}
